@@ -1,0 +1,27 @@
+PROFESSIONAL EXPERIENCE
+
+Senior Software Engineer, TechCorp Inc.
+June 2020 - Present
+• Managed engineering team of 5 developers building cloud infrastructure
+• Designed and implemented microservices architecture handling 100K+ users
+• Created automated deployment pipeline cutting release time by 60%
+• Coached junior team members in best practices for software development
+
+Software Engineer, StartupCo
+January 2018 - May 2020
+• Developed RESTful APIs with Python and Flask framework
+• Built scalable data pipelines for analytics platform
+• Worked closely with product team on new features
+• Enhanced system performance through optimization and refactoring
+
+EDUCATION
+
+B.S. Computer Science
+University of Technology, 2017
+
+TECHNICAL SKILLS
+
+Languages: Python, JavaScript, Java, SQL, Go
+Cloud: AWS, Azure, GCP, Docker, Kubernetes
+Web: Flask, Django, React, Node.js, Express
+Soft Skills: Team leadership, stakeholder management, Agile methodologies

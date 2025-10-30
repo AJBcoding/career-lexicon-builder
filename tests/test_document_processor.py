@@ -1,407 +1,381 @@
-"""Tests for document classification system."""
+"""
+Tests for document_processor module.
+"""
 
 import pytest
-from src.document_processor import (
+from core.document_processor import (
     DocumentType,
-    DocumentClassifier,
-    DocumentProcessor,
-    ClassificationResult
+    classify_by_filename,
+    classify_by_content,
+    classify_document
 )
 
 
-# Test Documents
+class TestDocumentType:
+    """Tests for DocumentType enum."""
 
-SAMPLE_RESUME = """
-JOHN DOE
-Software Engineer
-
-PROFESSIONAL SUMMARY
-Experienced software engineer with 5+ years developing scalable applications.
-
-EDUCATION
-Bachelor of Science in Computer Science
-University of Technology, 2018
-
-WORK EXPERIENCE
-Senior Software Engineer | Tech Company | 2020 - Present
-- Developed microservices architecture serving 1M+ users
-- Led team of 4 engineers
-
-Software Engineer | StartupCo | 2018 - 2020
-- Built RESTful APIs using Python and Django
-- Implemented CI/CD pipelines
-
-SKILLS
-Python, Java, JavaScript, AWS, Docker, Kubernetes
-
-CERTIFICATIONS
-AWS Certified Solutions Architect
-
-References available upon request.
-"""
-
-SAMPLE_COVER_LETTER = """
-January 15, 2024
-
-Dear Hiring Manager,
-
-I am writing to express my strong interest in the Senior Software Engineer position at Tech Innovations Inc. With over 5 years of experience in full-stack development and a proven track record of delivering scalable solutions, I believe I would be an excellent fit for your team.
-
-In my current role at Tech Company, I have led the development of microservices that serve over 1 million users daily. My experience aligns well with your requirements for someone who can design and implement distributed systems. I am particularly excited about your company's mission to democratize access to technology.
-
-My background in both startup and enterprise environments has given me the versatility to thrive in fast-paced, dynamic settings. I am confident that my technical skills and collaborative approach would make me a valuable addition to your engineering team.
-
-I would welcome the opportunity to discuss how my experience and passion for technology can contribute to Tech Innovations' continued success. Thank you for considering my application.
-
-Best regards,
-John Doe
-"""
-
-SAMPLE_JOB_DESCRIPTION = """
-Senior Software Engineer - Tech Innovations Inc.
-
-About Us:
-We are seeking a talented Senior Software Engineer to join our growing team. Tech Innovations is a fast-paced startup revolutionizing the industry through cutting-edge technology.
-
-Responsibilities:
-- Design and implement scalable microservices architecture
-- Lead technical discussions and mentor junior engineers  
-- Collaborate with product team to define requirements
-- Participate in code reviews and architectural decisions
-
-Requirements:
-- 5+ years of software engineering experience
-- Strong proficiency in Python, Java, or Go
-- Experience with AWS and container orchestration
-- Excellent communication skills
-
-Preferred Qualifications:
-- Master's degree in Computer Science
-- Experience with distributed systems
-- Prior startup experience
-
-What We Offer:
-- Competitive salary ($150,000 - $180,000)
-- Equity package
-- Comprehensive health benefits
-- Flexible work arrangements
-
-To Apply:
-Submit your resume and cover letter through our careers portal by February 1, 2024.
-
-Tech Innovations is an equal opportunity employer committed to diversity and inclusion.
-"""
-
-AMBIGUOUS_SHORT_TEXT = """
-Software Engineer
-5 years experience
-Python, Java
-"""
-
-MIXED_CHARACTERISTICS = """
-Dear Hiring Manager,
-
-PROFESSIONAL EXPERIENCE
-Senior Developer | Tech Corp | 2020 - Present
-
-Requirements:
-- 5+ years experience
-- Must have Python skills
-
-Please send resume to jobs@company.com
-"""
+    def test_enum_values(self):
+        """Test that all expected document types exist."""
+        assert DocumentType.RESUME.value == "resume"
+        assert DocumentType.COVER_LETTER.value == "cover_letter"
+        assert DocumentType.JOB_DESCRIPTION.value == "job_description"
+        assert DocumentType.UNKNOWN.value == "unknown"
 
 
-class TestDocumentClassifier:
-    """Test suite for DocumentClassifier."""
-    
-    def test_classify_resume(self):
-        """Test resume classification."""
-        classifier = DocumentClassifier()
-        result = classifier.classify(SAMPLE_RESUME)
-        
-        assert result.document_type == DocumentType.RESUME
-        assert result.confidence >= 0.7
-        assert "resume" in result.reasoning.lower()
-    
-    def test_classify_cover_letter(self):
-        """Test cover letter classification."""
-        classifier = DocumentClassifier()
-        result = classifier.classify(SAMPLE_COVER_LETTER)
-        
-        assert result.document_type == DocumentType.COVER_LETTER
-        assert result.confidence >= 0.7
-        assert "cover" in result.reasoning.lower() or "letter" in result.reasoning.lower()
-    
-    def test_classify_job_description(self):
-        """Test job description classification."""
-        classifier = DocumentClassifier()
-        result = classifier.classify(SAMPLE_JOB_DESCRIPTION)
-        
-        assert result.document_type == DocumentType.JOB_DESCRIPTION
-        assert result.confidence >= 0.65  # Realistic threshold for job descriptions
-        assert "job" in result.reasoning.lower() or "description" in result.reasoning.lower()
-    
-    def test_empty_text(self):
-        """Test classification of empty text."""
-        classifier = DocumentClassifier()
-        result = classifier.classify("")
-        
-        assert result.document_type == DocumentType.UNKNOWN
-        assert result.confidence == 0.0
-        assert "too short" in result.reasoning.lower()
-    
-    def test_very_short_text(self):
-        """Test classification of very short text."""
-        classifier = DocumentClassifier()
-        result = classifier.classify("Hello world")
-        
-        assert result.document_type == DocumentType.UNKNOWN
-        assert result.confidence == 0.0
-        assert "too short" in result.reasoning.lower()
-    
-    def test_ambiguous_text(self):
-        """Test classification of ambiguous text."""
-        classifier = DocumentClassifier()
-        result = classifier.classify(AMBIGUOUS_SHORT_TEXT)
-        
-        # Should either classify with low confidence or return UNKNOWN
-        assert result.confidence < 0.7 or result.document_type == DocumentType.UNKNOWN
-    
-    def test_mixed_characteristics(self):
-        """Test document with mixed characteristics."""
-        classifier = DocumentClassifier()
-        result = classifier.classify(MIXED_CHARACTERISTICS)
-        
-        # Mixed documents may be rejected as UNKNOWN due to low confidence
-        # This is correct behavior - better to be uncertain than wrong
-        assert isinstance(result, ClassificationResult)
-        assert result.confidence < 0.7  # Should have low confidence
-        # Reasoning should mention patterns or confidence
-        assert "pattern" in result.reasoning.lower() or "confidence" in result.reasoning.lower()
-    
-    def test_confidence_threshold(self):
-        """Test minimum confidence threshold."""
-        # Create truly ambiguous text with minimal distinguishing features
-        # Mix of different document type indicators to keep confidence low
-        truly_ambiguous = """
-        Technology professional with strong background in software.
-        Dear Hiring Committee, we are seeking qualified candidates.
-        Working in various roles from 2020 to present time.
-        Must have skills in multiple programming languages.
-        I am interested in opportunities that challenge me.
-        Requirements include teamwork and communication abilities.
-        Looking forward to discussing potential collaboration.
-        Education and experience in relevant technical areas.
-        Please submit applications to the recruitment team.
-        Developed solutions for complex business problems.
-        The ideal candidate will demonstrate expertise.
-        My qualifications align with industry standards.
-        """ * 2  # Repeat to ensure sufficient length
-        
-        # High threshold should reject ambiguous documents
-        classifier = DocumentClassifier(min_confidence=0.9)
-        result = classifier.classify(truly_ambiguous)
-        
-        # Should classify as UNKNOWN due to high confidence requirement
-        # (the mixed signals create lower confidence)
-        assert result.document_type == DocumentType.UNKNOWN
-        assert "confidence too low" in result.reasoning.lower()
-    
-    def test_resume_with_date_ranges(self):
-        """Test resume identification via date ranges."""
-        resume_with_dates = """
-        Work Experience:
-        Software Engineer | Company A | 2020 - 2023
-        Junior Developer | Company B | 2018 - 2020
-        
-        Education:
-        BS Computer Science | 2014 - 2018
+class TestClassifyByFilename:
+    """Tests for classify_by_filename function."""
+
+    def test_resume_patterns(self):
+        """Test resume filename patterns."""
+        assert classify_by_filename("resume.pdf") == DocumentType.RESUME
+        assert classify_by_filename("Resume-2024.docx") == DocumentType.RESUME
+        assert classify_by_filename("john_resume_final.pdf") == DocumentType.RESUME
+        assert classify_by_filename("CV.pdf") == DocumentType.RESUME
+        assert classify_by_filename("my-cv-2024.docx") == DocumentType.RESUME
+        assert classify_by_filename("curriculum.vitae.pdf") == DocumentType.RESUME
+
+    def test_cover_letter_patterns(self):
+        """Test cover letter filename patterns."""
+        assert classify_by_filename("cover_letter.pdf") == DocumentType.COVER_LETTER
+        assert classify_by_filename("CoverLetter.docx") == DocumentType.COVER_LETTER
+        assert classify_by_filename("cover-letter-company.pdf") == DocumentType.COVER_LETTER
+        assert classify_by_filename("letter.pdf") == DocumentType.COVER_LETTER
+
+    def test_job_description_patterns(self):
+        """Test job description filename patterns."""
+        assert classify_by_filename("job_description.pdf") == DocumentType.JOB_DESCRIPTION
+        assert classify_by_filename("JobDescription.docx") == DocumentType.JOB_DESCRIPTION
+        assert classify_by_filename("job-posting.pdf") == DocumentType.JOB_DESCRIPTION
+        assert classify_by_filename("position_description.pdf") == DocumentType.JOB_DESCRIPTION
+
+    def test_no_match(self):
+        """Test filenames that don't match any pattern."""
+        assert classify_by_filename("random_document.pdf") is None
+        assert classify_by_filename("notes.txt") is None
+        assert classify_by_filename("2024-10-meeting.docx") is None
+
+    def test_with_path(self):
+        """Test that classification works with full paths."""
+        assert classify_by_filename("/path/to/resume.pdf") == DocumentType.RESUME
+        assert classify_by_filename("../docs/cover_letter.docx") == DocumentType.COVER_LETTER
+
+    def test_case_insensitive(self):
+        """Test that pattern matching is case-insensitive."""
+        assert classify_by_filename("RESUME.PDF") == DocumentType.RESUME
+        assert classify_by_filename("CoverLetter.DOCX") == DocumentType.COVER_LETTER
+
+
+class TestClassifyByContent:
+    """Tests for classify_by_content function."""
+
+    def test_clear_resume(self):
+        """Test classification of clear resume content."""
+        text = """
+        John Doe
+        john@email.com | 555-123-4567
+
+        Experience
+        Senior Software Engineer | Tech Corp | 2020-2024
+        • Developed microservices architecture
+        • Led team of 5 engineers
+        • Improved system performance by 40%
+
+        Software Engineer | StartupCo | 2018-2020
+        • Built REST APIs
+        • Implemented CI/CD pipelines
+
+        Education
+        BS Computer Science | University | 2018
+
+        Skills
+        Python, JavaScript, AWS, Docker
         """
-        
-        classifier = DocumentClassifier()
-        result = classifier.classify(resume_with_dates)
-        
-        assert result.document_type == DocumentType.RESUME
-        assert result.confidence > 0.5
-    
-    def test_cover_letter_with_salutation(self):
-        """Test cover letter identification via salutation."""
-        letter_with_salutation = """
+        doc_type, confidence, reasoning = classify_by_content(text)
+        assert doc_type == DocumentType.RESUME
+        assert confidence >= 0.5
+        assert "resume" in reasoning.lower()
+
+    def test_clear_cover_letter(self):
+        """Test classification of clear cover letter content."""
+        text = """
         Dear Hiring Manager,
-        
-        I am writing to apply for the position. My experience includes
-        working with various technologies and teams. I look forward to
-        discussing this opportunity further.
-        
+
+        I am writing to express my strong interest in the Senior Software Engineer
+        position at Tech Corp. With over 6 years of experience in software development,
+        I am excited about the opportunity to contribute to your team.
+
+        My experience at StartupCo has prepared me well for this role. I have
+        consistently delivered high-quality software solutions and am passionate
+        about creating elegant, maintainable code.
+
+        I would welcome the opportunity to discuss how my background and skills
+        would benefit your organization. Thank you for your consideration.
+
+        Sincerely,
+        John Doe
+        """
+        doc_type, confidence, reasoning = classify_by_content(text)
+        assert doc_type == DocumentType.COVER_LETTER
+        assert confidence >= 0.5
+        assert "cover" in reasoning.lower()
+
+    def test_clear_job_description(self):
+        """Test classification of clear job description content."""
+        text = """
+        Senior Software Engineer
+
+        We are seeking a talented Senior Software Engineer to join our growing team.
+        The ideal candidate will have 5+ years of experience in software development.
+
+        Responsibilities include:
+        • Design and implement scalable microservices
+        • Mentor junior developers
+        • Participate in architecture decisions
+        • Lead technical projects
+
+        Required qualifications:
+        • BS in Computer Science or related field
+        • 5+ years of professional software development
+        • Strong knowledge of Python and JavaScript
+        • Experience with cloud platforms (AWS, GCP)
+
+        We offer competitive compensation, health benefits, and a collaborative
+        work environment. Join us in building the future of technology!
+        """
+        doc_type, confidence, reasoning = classify_by_content(text)
+        assert doc_type == DocumentType.JOB_DESCRIPTION
+        assert confidence >= 0.5
+        assert "job" in reasoning.lower() or "description" in reasoning.lower()
+
+    def test_resume_with_bullets(self):
+        """Test that bullet-heavy content suggests resume."""
+        text = """
+        Experience
+        Software Engineer 2020-2024
+        • First bullet point about work
+        • Second bullet point about work
+        • Third bullet point about work
+        • Fourth bullet point about work
+        • Fifth bullet point about work
+
+        Education
+        BS Computer Science 2020
+        """
+        doc_type, confidence, reasoning = classify_by_content(text)
+        assert doc_type == DocumentType.RESUME
+
+    def test_cover_letter_no_bullets(self):
+        """Test that paragraph-heavy content suggests cover letter."""
+        text = """
+        Dear Hiring Manager,
+
+        I am writing to apply for the position. I have extensive experience in the field
+        and believe I would be a great fit for your team. My background includes working
+        on various projects where I demonstrated strong technical skills.
+
+        I am excited to apply and look forward to discussing this opportunity.
+
         Sincerely,
         Jane Smith
         """
-        
-        classifier = DocumentClassifier()
-        result = classifier.classify(letter_with_salutation)
-        
-        assert result.document_type == DocumentType.COVER_LETTER
-        assert result.confidence > 0.6
-    
-    def test_job_description_with_requirements(self):
-        """Test job description identification via requirements."""
-        job_desc_text = """
-        Position: Senior Engineer
-        
-        Responsibilities:
-        - Design systems
-        - Lead team
-        
-        Requirements:
-        - 5+ years experience required
-        - Must have Python skills
-        - Preferred: AWS certification
-        
-        To apply, submit your resume to careers@company.com
-        We are an equal opportunity employer.
+        doc_type, confidence, reasoning = classify_by_content(text)
+        assert doc_type == DocumentType.COVER_LETTER
+
+    def test_ambiguous_content(self):
+        """Test classification of ambiguous content."""
+        text = """
+        This is some generic text that doesn't really indicate what type of
+        document it is. It's just a bunch of words without clear patterns.
         """
-        
-        classifier = DocumentClassifier()
-        result = classifier.classify(job_desc_text)
-        
-        assert result.document_type == DocumentType.JOB_DESCRIPTION
-        assert result.confidence > 0.6
-    
-    def test_classification_result_structure(self):
-        """Test that ClassificationResult has correct structure."""
-        classifier = DocumentClassifier()
-        result = classifier.classify(SAMPLE_RESUME)
-        
-        assert isinstance(result, ClassificationResult)
-        assert isinstance(result.document_type, DocumentType)
-        assert isinstance(result.confidence, float)
-        assert isinstance(result.reasoning, str)
-        assert 0.0 <= result.confidence <= 1.0
-        assert len(result.reasoning) > 0
+        doc_type, confidence, reasoning = classify_by_content(text)
+        # Should return UNKNOWN with low confidence
+        assert doc_type == DocumentType.UNKNOWN
+        assert confidence < 0.5
 
+    def test_empty_text(self):
+        """Test classification of empty text."""
+        doc_type, confidence, reasoning = classify_by_content("")
+        assert doc_type == DocumentType.UNKNOWN
+        assert confidence == 0.0
+        assert "too short" in reasoning.lower()
 
-class TestDocumentProcessor:
-    """Test suite for DocumentProcessor."""
-    
-    def test_process_resume(self):
-        """Test processing a resume document."""
-        processor = DocumentProcessor()
-        result = processor.process_document(SAMPLE_RESUME, filename="resume.txt")
-        
-        assert result['document_type'] == 'resume'
-        assert result['confidence'] >= 0.7
-        assert result['text_length'] > 0
-        assert result['filename'] == "resume.txt"
-        assert 'reasoning' in result
-    
-    def test_process_cover_letter(self):
-        """Test processing a cover letter."""
-        processor = DocumentProcessor()
-        result = processor.process_document(SAMPLE_COVER_LETTER)
-        
-        assert result['document_type'] == 'cover_letter'
-        assert result['confidence'] >= 0.7
-        assert result['filename'] is None  # No filename provided
-    
-    def test_process_job_description(self):
-        """Test processing a job description."""
-        processor = DocumentProcessor()
-        result = processor.process_document(SAMPLE_JOB_DESCRIPTION)
-        
-        assert result['document_type'] == 'job_description'
-        assert result['confidence'] >= 0.65  # Realistic threshold
-    
-    def test_result_dictionary_structure(self):
-        """Test that result dictionary has expected structure."""
-        processor = DocumentProcessor()
-        result = processor.process_document(SAMPLE_RESUME, filename="test.txt")
-        
-        required_keys = ['document_type', 'confidence', 'reasoning', 'text_length', 'filename']
-        for key in required_keys:
-            assert key in result
-        
-        assert isinstance(result['document_type'], str)
-        assert isinstance(result['confidence'], float)
-        assert isinstance(result['reasoning'], str)
-        assert isinstance(result['text_length'], int)
-    
-    def test_custom_confidence_threshold(self):
-        """Test processor with custom confidence threshold."""
-        processor = DocumentProcessor(min_confidence=0.9)
-        result = processor.process_document(AMBIGUOUS_SHORT_TEXT)
-        
-        # Should classify as unknown with high threshold
-        assert result['document_type'] == 'unknown'
+    def test_very_short_text(self):
+        """Test classification of very short text."""
+        doc_type, confidence, reasoning = classify_by_content("Hello world")
+        assert doc_type == DocumentType.UNKNOWN
+        assert confidence == 0.0
+        assert "too short" in reasoning.lower()
 
+    def test_resume_with_date_ranges(self):
+        """Test that date ranges increase resume confidence."""
+        text = """
+        Experience
 
-class TestEdgeCases:
-    """Test edge cases and error conditions."""
-    
-    def test_whitespace_only(self):
-        """Test document with only whitespace."""
-        classifier = DocumentClassifier()
-        result = classifier.classify("   \n\n  \t  ")
-        
-        assert result.document_type == DocumentType.UNKNOWN
-        assert result.confidence == 0.0
-    
-    def test_special_characters(self):
-        """Test document with many special characters."""
-        special_text = """
-        !!!! @@@@ #### $$$$ %%%% ^^^^
-        &&&& **** (()) ---- ====
+        Software Engineer
+        Tech Corp | 2020-2024
+        Worked on various projects
+
+        Junior Developer
+        StartupCo | 2018-2020
+        Built web applications
+
+        Education
+        BS Computer Science 2018
         """
-        
-        classifier = DocumentClassifier()
-        result = classifier.classify(special_text)
-        
-        assert result.document_type == DocumentType.UNKNOWN
-    
-    def test_non_english_text(self):
-        """Test classification with non-English text."""
-        # This should fail gracefully
-        non_english = """
-        Î³"Î³Â«Î³'Î³â€•Î´Îˆâ€“Î·â€¢Å’
-        Hola mundo
-        Î â€”Î Î„Î¡â‚¬Î Â°Î Â²Î¡Î¡â€šÎ Â²Î¡Æ’Î Î‰Î¡â€šÎ Î…
+        doc_type, confidence, reasoning = classify_by_content(text)
+        assert doc_type == DocumentType.RESUME
+        assert "date range" in reasoning.lower()
+
+    def test_resume_with_present(self):
+        """Test date ranges with 'present'."""
+        text = """
+        Experience
+        Senior Engineer | 2020-present
+        Currently working on projects
+
+        Skills
+        Python, JavaScript
         """
-        
-        classifier = DocumentClassifier()
-        result = classifier.classify(non_english)
-        
-        # Should handle gracefully, likely classify as UNKNOWN
-        assert isinstance(result, ClassificationResult)
-    
-    def test_very_long_document(self):
-        """Test classification of very long document."""
-        long_resume = SAMPLE_RESUME * 100  # Repeat to make very long
-        
-        classifier = DocumentClassifier()
-        result = classifier.classify(long_resume)
-        
-        # Should still classify correctly
-        assert result.document_type == DocumentType.RESUME
-        assert result.confidence > 0.6
+        doc_type, confidence, reasoning = classify_by_content(text)
+        assert doc_type == DocumentType.RESUME
+
+    def test_cover_letter_with_salutation_only(self):
+        """Test cover letter detection with just salutation."""
+        text = """
+        Dear Sir or Madam,
+
+        This is a letter with a salutation but not much else that clearly
+        indicates it's a cover letter. Let's see how it classifies. I am
+        interested in working with your company and bringing my skills to
+        help your team succeed.
+
+        Thank you for your time and consideration.
+        """
+        doc_type, confidence, reasoning = classify_by_content(text)
+        assert doc_type == DocumentType.COVER_LETTER
+        assert confidence >= 0.3
+
+    def test_job_description_with_company_voice(self):
+        """Test job description with company-centric language."""
+        text = """
+        About the Role
+
+        We are looking for a talented engineer to join our team. Our company
+        is building innovative solutions and we offer competitive benefits.
+
+        You will be responsible for designing and implementing new features,
+        collaborating with product teams, and ensuring high code quality.
+
+        Required qualifications include 3+ years of experience and strong
+        problem-solving skills. Join us in making an impact!
+        """
+        doc_type, confidence, reasoning = classify_by_content(text)
+        assert doc_type == DocumentType.JOB_DESCRIPTION
+
+    def test_multiple_resume_sections(self):
+        """Test that multiple resume sections increase confidence."""
+        text = """
+        Professional Summary
+        Experienced software engineer with proven track record
+
+        Experience
+        Various roles over the years
+
+        Education
+        Degrees and certifications
+
+        Skills
+        Technical proficiencies
+
+        Certifications
+        Industry certifications
+        """
+        doc_type, confidence, reasoning = classify_by_content(text)
+        assert doc_type == DocumentType.RESUME
+        assert confidence >= 0.5
 
 
-@pytest.fixture
-def classifier():
-    """Fixture providing a DocumentClassifier instance."""
-    return DocumentClassifier()
+class TestClassifyDocument:
+    """Tests for classify_document function."""
 
+    def test_filename_match_resume(self):
+        """Test that filename match takes priority."""
+        text = "Some generic text"
+        doc_type, confidence, reasoning = classify_document("resume.pdf", text)
+        assert doc_type == DocumentType.RESUME
+        assert confidence == 0.95
+        assert "filename match" in reasoning.lower()
 
-@pytest.fixture
-def processor():
-    """Fixture providing a DocumentProcessor instance."""
-    return DocumentProcessor()
+    def test_filename_match_cover_letter(self):
+        """Test filename match for cover letter."""
+        text = "Some generic text"
+        doc_type, confidence, reasoning = classify_document("cover_letter.docx", text)
+        assert doc_type == DocumentType.COVER_LETTER
+        assert confidence == 0.95
+        assert "filename match" in reasoning.lower()
 
+    def test_content_fallback(self):
+        """Test that content analysis is used when filename doesn't match."""
+        text = """
+        Dear Hiring Manager,
 
-def test_classifier_fixture(classifier):
-    """Test classifier fixture."""
-    assert isinstance(classifier, DocumentClassifier)
+        I am writing to express my interest in the position. I have extensive
+        experience and would love to contribute to your team.
 
+        Sincerely,
+        Jane Doe
+        """
+        doc_type, confidence, reasoning = classify_document("document.pdf", text)
+        assert doc_type == DocumentType.COVER_LETTER
+        assert "content analysis" in reasoning.lower()
 
-def test_processor_fixture(processor):
-    """Test processor fixture."""
-    assert isinstance(processor, DocumentProcessor)
+    def test_filename_with_path(self):
+        """Test that paths are handled correctly."""
+        text = "Some text"
+        doc_type, confidence, reasoning = classify_document("/path/to/resume.pdf", text)
+        assert doc_type == DocumentType.RESUME
+        assert confidence == 0.95
+
+    def test_ambiguous_filename_and_content(self):
+        """Test ambiguous document with generic filename."""
+        text = "Just some random text without clear indicators."
+        doc_type, confidence, reasoning = classify_document("notes.txt", text)
+        assert doc_type == DocumentType.UNKNOWN
+        assert confidence < 0.5
+
+    def test_conflicting_filename_content(self):
+        """Test when filename suggests one type but content another."""
+        # Filename says resume, but content is clearly a cover letter
+        text = """
+        Dear Hiring Manager,
+
+        I am writing to apply for the Software Engineer position. I am excited
+        about this opportunity and believe my skills align well with your needs.
+
+        Sincerely,
+        John Doe
+        """
+        # Filename should take priority
+        doc_type, confidence, reasoning = classify_document("resume.pdf", text)
+        assert doc_type == DocumentType.RESUME
+        assert confidence == 0.95
+        assert "filename match" in reasoning.lower()
+
+    def test_content_analysis_with_high_confidence(self):
+        """Test content analysis with clear indicators."""
+        text = """
+        Experience
+
+        Senior Engineer | Tech Corp | 2020-2024
+        • Led engineering team
+        • Designed systems
+
+        Education
+        BS Computer Science 2018
+
+        Skills
+        Python, AWS, Docker
+        """
+        doc_type, confidence, reasoning = classify_document("document.txt", text)
+        assert doc_type == DocumentType.RESUME
+        assert confidence >= 0.5
