@@ -10,7 +10,9 @@ from typing import List, Optional, Dict, Set
 from datetime import date
 from collections import Counter, defaultdict
 import re
-from utils.similarity import calculate_semantic_similarity
+import numpy as np
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
 from core.document_processor import DocumentType
 
 
@@ -63,6 +65,22 @@ STOPWORDS = {
 
 # Minimum keyword length
 MIN_KEYWORD_LENGTH = 10
+
+# Load the model once at module level for efficiency
+_model = None
+
+
+def _get_model() -> SentenceTransformer:
+    """
+    Get or initialize the sentence transformer model.
+
+    Returns:
+        SentenceTransformer: Pre-trained sentence embedding model
+    """
+    global _model
+    if _model is None:
+        _model = SentenceTransformer('all-MiniLM-L6-v2')
+    return _model
 
 
 def extract_keywords_from_document(text: str, filepath: str, doc_type: str,
@@ -210,9 +228,16 @@ def build_keyword_index(usages: List[KeywordUsage]) -> List[KeywordEntry]:
         normalized = usage.keyword.lower().strip()
         keyword_groups[normalized].append(usage)
 
+    # Pre-compute embeddings for all keywords once (huge optimization!)
+    all_keywords = list(keyword_groups.keys())
+    keyword_embeddings = _compute_keyword_embeddings(all_keywords)
+
+    # Compute full similarity matrix ONCE (massive speedup!)
+    similarity_matrix = cosine_similarity(keyword_embeddings, keyword_embeddings)
+
     # Build KeywordEntry objects
     entries = []
-    for keyword, usage_list in keyword_groups.items():
+    for idx, (keyword, usage_list) in enumerate(keyword_groups.items()):
         # Sort usages by date (most recent first)
         usage_list.sort(key=lambda u: u.date if u.date else date.min, reverse=True)
 
@@ -222,8 +247,12 @@ def build_keyword_index(usages: List[KeywordUsage]) -> List[KeywordEntry]:
         # Collect document types
         doc_types = set(u.document_type for u in usage_list)
 
-        # Find aliases (other keywords that are semantically similar)
-        aliases = _find_aliases(keyword, list(keyword_groups.keys()))
+        # Find aliases using pre-computed similarity matrix
+        aliases = _find_aliases_from_matrix(
+            keyword_idx=idx,
+            all_keywords=all_keywords,
+            similarity_matrix=similarity_matrix
+        )
 
         entry = KeywordEntry(
             keyword=keyword,
@@ -240,32 +269,56 @@ def build_keyword_index(usages: List[KeywordUsage]) -> List[KeywordEntry]:
     return entries
 
 
-def _find_aliases(target_keyword: str, all_keywords: List[str],
-                  threshold: float = 0.8) -> List[str]:
+def _compute_keyword_embeddings(keywords: List[str]) -> np.ndarray:
     """
-    Find semantically similar keywords as aliases.
+    Compute embeddings for all keywords in a single batch.
 
     Args:
-        target_keyword: The keyword to find aliases for
-        all_keywords: List of all keywords to compare against
+        keywords: List of keywords to encode
+
+    Returns:
+        numpy array of embeddings with shape (n_keywords, embedding_dim)
+    """
+    if not keywords:
+        return np.array([])
+
+    model = _get_model()
+    embeddings = model.encode(keywords, show_progress_bar=True)
+    return embeddings
+
+
+def _find_aliases_from_matrix(keyword_idx: int, all_keywords: List[str],
+                              similarity_matrix: np.ndarray, threshold: float = 0.8) -> List[str]:
+    """
+    Find semantically similar keywords as aliases using pre-computed similarity matrix.
+
+    Args:
+        keyword_idx: Index of the target keyword in all_keywords
+        all_keywords: List of all keywords
+        similarity_matrix: Pre-computed similarity matrix (n_keywords × n_keywords)
         threshold: Similarity threshold (0.8 = very similar)
 
     Returns:
         List of alias keywords
     """
+    if len(all_keywords) == 0 or similarity_matrix.size == 0:
+        return []
+
+    # Extract similarities for this keyword (just a row lookup!)
+    similarities = similarity_matrix[keyword_idx]
+
+    # Find keywords above threshold (excluding self)
     aliases = []
-
-    for keyword in all_keywords:
-        if keyword == target_keyword:
-            continue
-
-        # Calculate semantic similarity
-        similarity = calculate_semantic_similarity(target_keyword, keyword)
+    for idx, similarity in enumerate(similarities):
+        if idx == keyword_idx:
+            continue  # Skip self
 
         if similarity >= threshold:
-            aliases.append(keyword)
+            aliases.append((all_keywords[idx], similarity))
 
-    return aliases[:5]  # Limit to top 5 aliases
+    # Sort by similarity (highest first) and return top 5
+    aliases.sort(key=lambda x: x[1], reverse=True)
+    return [keyword for keyword, _ in aliases[:5]]
 
 
 def analyze_keywords(documents: List[Dict], min_frequency: int = 2) -> List[KeywordEntry]:

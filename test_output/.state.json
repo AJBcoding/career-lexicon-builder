@@ -1,0 +1,30 @@
+{
+  "last_updated": "2025-10-30T10:50:30.765411",
+  "version": "1.0.0",
+  "documents": {
+    "tests/fixtures/sample_resume_v2.txt": {
+      "filepath": "tests/fixtures/sample_resume_v2.txt",
+      "file_hash": "8db4a432348820c3c5809869c80f423ae651a24c686dd9fcb12059b24bd66afb",
+      "document_type": "resume",
+      "date_processed": "2025-10-29T16:22:31.937729",
+      "date_from_filename": null,
+      "extraction_success": true
+    },
+    "tests/fixtures/sample_cover_letter.txt": {
+      "filepath": "tests/fixtures/sample_cover_letter.txt",
+      "file_hash": "2a6a6bcc1e8580d87d66d4ad5bda8e98b37ec3c3c381ad14adafbe4f2c83871e",
+      "document_type": "cover_letter",
+      "date_processed": "2025-10-29T16:22:31.939952",
+      "date_from_filename": null,
+      "extraction_success": true
+    },
+    "tests/fixtures/sample_resume.txt": {
+      "filepath": "tests/fixtures/sample_resume.txt",
+      "file_hash": "bd8d4d2486abc98c38f5ce23d78cbb6403ccfcd344480802168dbfce469fa43c",
+      "document_type": "resume",
+      "date_processed": "2025-10-29T16:22:31.940830",
+      "date_from_filename": null,
+      "extraction_success": true
+    }
+  }
+}

@@ -98,7 +98,7 @@ def process_documents(input_dir: str, manifest: ProcessingManifest) -> List[Dict
             doc_dict = {
                 'text': text,
                 'filepath': filepath,
-                'doc_type': doc_type,
+                'document_type': doc_type.value,
             }
 
             # Add date if found

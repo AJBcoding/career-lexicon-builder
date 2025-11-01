@@ -1,0 +1,302 @@
+{
+  "last_updated": "2025-10-31T12:45:13.924649",
+  "version": "1.0.0",
+  "documents": {
+    "my_documents/converted/Annenberg COO Letter Formatted.pdf": {
+      "filepath": "my_documents/converted/Annenberg COO Letter Formatted.pdf",
+      "file_hash": "4b6e0ead4ae8457fd9b5cbcda158d6610196463bd2286350a4565fa9cf39e5f2",
+      "document_type": "cover_letter",
+      "date_processed": "2025-10-31T12:36:05.183619",
+      "date_from_filename": null,
+      "extraction_success": true
+    },
+    "my_documents/converted/2015-11-11 - Ensemble theatre company md .pdf": {
+      "filepath": "my_documents/converted/2015-11-11 - Ensemble theatre company md .pdf",
+      "file_hash": "da2fa519b1122167c93892d0d73cf005cd77b44befeafa2e4c4e2e66c7220680",
+      "document_type": "cover_letter",
+      "date_processed": "2025-10-31T12:36:05.261901",
+      "date_from_filename": "2015-11-11",
+      "extraction_success": true
+    },
+    "my_documents/converted/2015 - 09 - 04 - LA Stage.pdf": {
+      "filepath": "my_documents/converted/2015 - 09 - 04 - LA Stage.pdf",
+      "file_hash": "1ce074e4963dabe774ce9384bd53c257a29f7d82003e95bcf850bdd815dddde5",
+      "document_type": "cover_letter",
+      "date_processed": "2025-10-31T12:36:05.434291",
+      "date_from_filename": null,
+      "extraction_success": true
+    },
+    "my_documents/converted/2025-10-13 - Colburn School, Byrnes, Anthony - submitted.pdf": {
+      "filepath": "my_documents/converted/2025-10-13 - Colburn School, Byrnes, Anthony - submitted.pdf",
+      "file_hash": "3d625047252cc743f711adf018c86b8d0a74adef467fc28f63f0fa33d206d4e6",
+      "document_type": "cover_letter",
+      "date_processed": "2025-10-31T12:36:05.719913",
+      "date_from_filename": "2025-10-13",
+      "extraction_success": true
+    },
+    "my_documents/converted/2024-11-25 - UCLA cover letter v. 2.pdf": {
+      "filepath": "my_documents/converted/2024-11-25 - UCLA cover letter v. 2.pdf",
+      "file_hash": "71e3526a37538ab4fdb4ac6c638a00c49ecc2a0d1a69ef3e6c020e7ccb7c140a",
+      "document_type": "cover_letter",
+      "date_processed": "2025-10-31T12:36:06.208465",
+      "date_from_filename": "2024-11-25",
+      "extraction_success": true
+    },
+    "my_documents/converted/AJB Resume 2014 - Wallis.pdf": {
+      "filepath": "my_documents/converted/AJB Resume 2014 - Wallis.pdf",
+      "file_hash": "79e7604e84a344b5444baa699abd03526495c6419741cd930d53ce38592a9f0b",
+      "document_type": "resume",
+      "date_processed": "2025-10-31T12:36:07.056517",
+      "date_from_filename": null,
+      "extraction_success": true
+    },
+    "my_documents/converted/Anthony Byrnes - Executive Director 2014 Final.pdf": {
+      "filepath": "my_documents/converted/Anthony Byrnes - Executive Director 2014 Final.pdf",
+      "file_hash": "e97224628543c6e56a896735d300cd2b37807532384121ab43d6eadefe3d31e7",
+      "document_type": "cover_letter",
+      "date_processed": "2025-10-31T12:36:07.412891",
+      "date_from_filename": null,
+      "extraction_success": true
+    },
+    "my_documents/converted/AJB Resume 2014 - Antaeus.pdf": {
+      "filepath": "my_documents/converted/AJB Resume 2014 - Antaeus.pdf",
+      "file_hash": "0fcb723fc09f800a9e9bdce1a57df23cb00b04453fff24e1174666a92efba603",
+      "document_type": "resume",
+      "date_processed": "2025-10-31T12:36:08.182968",
+      "date_from_filename": null,
+      "extraction_success": true
+    },
+    "my_documents/converted/Anthony Byrnes - Executive Director copy.pdf": {
+      "filepath": "my_documents/converted/Anthony Byrnes - Executive Director copy.pdf",
+      "file_hash": "21a82d668452b617870dd423921faba8f06d0fde015a72529922ce479dccfdd4",
+      "document_type": "cover_letter",
+      "date_processed": "2025-10-31T12:36:08.273152",
+      "date_from_filename": null,
+      "extraction_success": true
+    },
+    "my_documents/converted/2015 - 02 - 26 - Anthony Byrnes - Broad Stage.pdf": {
+      "filepath": "my_documents/converted/2015 - 02 - 26 - Anthony Byrnes - Broad Stage.pdf",
+      "file_hash": "25e978ce9ae4ff0a451f178cadc0f94184178f36a21a86279968c7f7d669197c",
+      "document_type": "cover_letter",
+      "date_processed": "2025-10-31T12:36:08.726884",
+      "date_from_filename": null,
+      "extraction_success": true
+    },
+    "my_documents/converted/AJB Resume Nov 2011.pdf": {
+      "filepath": "my_documents/converted/AJB Resume Nov 2011.pdf",
+      "file_hash": "eb25906616274b0ca896f23df0720f278fd61a469a36b08e04826dc875bf8ac0",
+      "document_type": "resume",
+      "date_processed": "2025-10-31T12:36:09.081153",
+      "date_from_filename": null,
+      "extraction_success": true
+    },
+    "my_documents/converted/2016-01-29 - AJB resume  v2.pdf": {
+      "filepath": "my_documents/converted/2016-01-29 - AJB resume  v2.pdf",
+      "file_hash": "2753bc64d407b268fdc15c5f8f23af1d772a8d9065ca98e1d88aca8cfc001029",
+      "document_type": "resume",
+      "date_processed": "2025-10-31T12:36:09.372930",
+      "date_from_filename": "2016-01-29",
+      "extraction_success": true
+    },
+    "my_documents/converted/AJB CV Feb 2014.pdf": {
+      "filepath": "my_documents/converted/AJB CV Feb 2014.pdf",
+      "file_hash": "47f28a74ad51abc7dcd746d5de671b60cad328bef7bfc64e81cef683f6b19ccf",
+      "document_type": "resume",
+      "date_processed": "2025-10-31T12:36:10.547824",
+      "date_from_filename": null,
+      "extraction_success": true
+    },
+    "my_documents/converted/2015-12-01 - DCA Anthony Byrnes Resume.pdf": {
+      "filepath": "my_documents/converted/2015-12-01 - DCA Anthony Byrnes Resume.pdf",
+      "file_hash": "96c78337edd6fc91457be291d0dc1734401b92213a66843ebabf379e3bcddbfc",
+      "document_type": "resume",
+      "date_processed": "2025-10-31T12:36:10.881924",
+      "date_from_filename": "2015-12-01",
+      "extraction_success": true
+    },
+    "my_documents/converted/Taper Job Description 2011.pdf": {
+      "filepath": "my_documents/converted/Taper Job Description 2011.pdf",
+      "file_hash": "8f3649fc7df11f293e71264bb8afe6d28d5556594d93175216e29cb601593890",
+      "document_type": "job_description",
+      "date_processed": "2025-10-31T12:36:11.135642",
+      "date_from_filename": null,
+      "extraction_success": true
+    },
+    "my_documents/converted/18th Street Arts Center.pdf": {
+      "filepath": "my_documents/converted/18th Street Arts Center.pdf",
+      "file_hash": "9919086a519ff528703154a8b7c0458e382e090cd070d079162672513582eaf5",
+      "document_type": "cover_letter",
+      "date_processed": "2025-10-31T12:36:11.193380",
+      "date_from_filename": null,
+      "extraction_success": true
+    },
+    "my_documents/converted/2023-02-25 - CSULB cover letter.pdf": {
+      "filepath": "my_documents/converted/2023-02-25 - CSULB cover letter.pdf",
+      "file_hash": "6cedaaeb56a392a75dc69f33ec4e7374a52a4d3fc9733dcd3df8c522934de8f1",
+      "document_type": "cover_letter",
+      "date_processed": "2025-10-31T12:36:12.038726",
+      "date_from_filename": "2023-02-25",
+      "extraction_success": true
+    },
+    "my_documents/converted/2023-08-01 - Byrnes, Anthony COTA AD cover letter .pdf": {
+      "filepath": "my_documents/converted/2023-08-01 - Byrnes, Anthony COTA AD cover letter .pdf",
+      "file_hash": "9197658ae469f5a3d70fd11fd6c7540648e75fd5ab5a485cf547efb0c0894368",
+      "document_type": "cover_letter",
+      "date_processed": "2025-10-31T12:36:12.208430",
+      "date_from_filename": "2023-08-01",
+      "extraction_success": true
+    },
+    "my_documents/converted/AJB Irvine APP  Final.pdf": {
+      "filepath": "my_documents/converted/AJB Irvine APP  Final.pdf",
+      "file_hash": "f372be3c2a0fe902d9ba73834507b069fe96c178c2b2a1e7ed2bb66e43603d64",
+      "document_type": "cover_letter",
+      "date_processed": "2025-10-31T12:36:13.628362",
+      "date_from_filename": null,
+      "extraction_success": true
+    },
+    "my_documents/converted/2015-12-01 - DCA Anthony Byrnes.pdf": {
+      "filepath": "my_documents/converted/2015-12-01 - DCA Anthony Byrnes.pdf",
+      "file_hash": "f72d3b538ba0a4dff11a7955bec594bcd6dfca6f57fb6bed31d6507bed05b305",
+      "document_type": "cover_letter",
+      "date_processed": "2025-10-31T12:36:13.802684",
+      "date_from_filename": "2015-12-01",
+      "extraction_success": true
+    },
+    "my_documents/converted/2025-01-15 - CSULB AD  Diversity Statement.pdf": {
+      "filepath": "my_documents/converted/2025-01-15 - CSULB AD  Diversity Statement.pdf",
+      "file_hash": "618c112e1e34269ba5b8acac6437fa8ec6124915841960dab3107a87876c1de2",
+      "document_type": "resume",
+      "date_processed": "2025-10-31T12:36:14.032541",
+      "date_from_filename": "2025-01-15",
+      "extraction_success": true
+    },
+    "my_documents/converted/2023-01-27 - csuf cover final.pdf": {
+      "filepath": "my_documents/converted/2023-01-27 - csuf cover final.pdf",
+      "file_hash": "420f5c2479c6c7deff5c2b3e493ab4423977033c20a5cc14c6ebef2d51da4ecc",
+      "document_type": "cover_letter",
+      "date_processed": "2025-10-31T12:36:14.670765",
+      "date_from_filename": "2023-01-27",
+      "extraction_success": true
+    },
+    "my_documents/converted/AJB cover letter- PROJECT AUDIENCE.pdf": {
+      "filepath": "my_documents/converted/AJB cover letter- PROJECT AUDIENCE.pdf",
+      "file_hash": "f0de16b9c9e3650a4091e8b9ec888136568608f8cd200ad5f4aeb5fab5eb48de",
+      "document_type": "cover_letter",
+      "date_processed": "2025-10-31T12:36:15.075340",
+      "date_from_filename": null,
+      "extraction_success": true
+    },
+    "my_documents/converted/AJB CV 2015 v2.pdf": {
+      "filepath": "my_documents/converted/AJB CV 2015 v2.pdf",
+      "file_hash": "8cbb9c1d5d3a25e761d12b894a504056968c72c08ef03c474f1935e7d3700342",
+      "document_type": "resume",
+      "date_processed": "2025-10-31T12:36:16.365032",
+      "date_from_filename": null,
+      "extraction_success": true
+    },
+    "my_documents/converted/2025-01-15- CSULB AD cover letter.pdf": {
+      "filepath": "my_documents/converted/2025-01-15- CSULB AD cover letter.pdf",
+      "file_hash": "bd3927a84653759ba8a927f8ea21b467a56f7ab1327c76774d09be39b8a8751d",
+      "document_type": "cover_letter",
+      "date_processed": "2025-10-31T12:36:16.704496",
+      "date_from_filename": "2025-01-15",
+      "extraction_success": true
+    },
+    "my_documents/converted/AJB RESUME NEA 3:11.pdf": {
+      "filepath": "my_documents/converted/AJB RESUME NEA 3:11.pdf",
+      "file_hash": "1b9cdfbfae98264043ee3240e63aba661d5fd45dc1e8b69e8b5356be27823efd",
+      "document_type": "resume",
+      "date_processed": "2025-10-31T12:36:16.924571",
+      "date_from_filename": null,
+      "extraction_success": true
+    },
+    "my_documents/converted/AJB CV 2024.pdf": {
+      "filepath": "my_documents/converted/AJB CV 2024.pdf",
+      "file_hash": "00b7a2299c80815d531adaae51cd80956325e7ee09cdabc889715fb70515bfcd",
+      "document_type": "resume",
+      "date_processed": "2025-10-31T12:36:19.416098",
+      "date_from_filename": null,
+      "extraction_success": true
+    },
+    "my_documents/converted/2023-02-26- diversity statement .pdf": {
+      "filepath": "my_documents/converted/2023-02-26- diversity statement .pdf",
+      "file_hash": "fb40a448c903f611303af4151a84a3125ce33a0a0aa3c10f9e8f72ab0c39b589",
+      "document_type": "cover_letter",
+      "date_processed": "2025-10-31T12:36:19.582735",
+      "date_from_filename": "2023-02-26",
+      "extraction_success": true
+    },
+    "my_documents/converted/AJB USC APP ALL June 2011 Final.pdf": {
+      "filepath": "my_documents/converted/AJB USC APP ALL June 2011 Final.pdf",
+      "file_hash": "e1ae0e986de0480f5e968761641c1cb92ed1babe9b45314c5737b31546766173",
+      "document_type": "cover_letter",
+      "date_processed": "2025-10-31T12:36:20.713405",
+      "date_from_filename": null,
+      "extraction_success": true
+    },
+    "my_documents/converted/AJB Resume 2014 - Broad.pdf": {
+      "filepath": "my_documents/converted/AJB Resume 2014 - Broad.pdf",
+      "file_hash": "d46d742fbe965e07e3c58baed030d7e3de6255fa38223f6aa9b467d0f2e155b5",
+      "document_type": "resume",
+      "date_processed": "2025-10-31T12:36:21.491915",
+      "date_from_filename": null,
+      "extraction_success": true
+    },
+    "my_documents/converted/2020-11-23 - ajb resume.pdf": {
+      "filepath": "my_documents/converted/2020-11-23 - ajb resume.pdf",
+      "file_hash": "ad206a1d2f68aa9f5cb7c691e5592d07d291e15eb6c3dc44b09cb1f85f486dfc",
+      "document_type": "resume",
+      "date_processed": "2025-10-31T12:36:21.700633",
+      "date_from_filename": "2020-11-23",
+      "extraction_success": true
+    },
+    "my_documents/converted/AJB Resume Greenway Feb 2013 .pdf": {
+      "filepath": "my_documents/converted/AJB Resume Greenway Feb 2013 .pdf",
+      "file_hash": "87da9ac97c683446ae847a436f7d05671ccb295f195baf43ae1b9ecc26cd84ec",
+      "document_type": "resume",
+      "date_processed": "2025-10-31T12:36:22.443309",
+      "date_from_filename": null,
+      "extraction_success": true
+    },
+    "my_documents/converted/2025-10-13 - Byrnes, Anthony Resume - Colburn School submitted.pdf": {
+      "filepath": "my_documents/converted/2025-10-13 - Byrnes, Anthony Resume - Colburn School submitted.pdf",
+      "file_hash": "0151ca278bc1576b84897afb873b0190956da0291bc007a93146bb44101f2e57",
+      "document_type": "resume",
+      "date_processed": "2025-10-31T12:36:22.775331",
+      "date_from_filename": "2025-10-13",
+      "extraction_success": true
+    },
+    "my_documents/converted/USC - Cover Letter.pdf": {
+      "filepath": "my_documents/converted/USC - Cover Letter.pdf",
+      "file_hash": "e5e003c5c343a3f91837579ad9d6c6f5624c5cb64d4044813db43ad622dccfd8",
+      "document_type": "cover_letter",
+      "date_processed": "2025-10-31T12:36:22.998977",
+      "date_from_filename": null,
+      "extraction_success": true
+    },
+    "my_documents/converted/2024-11-25 - UCLA Diversity Statement.pdf": {
+      "filepath": "my_documents/converted/2024-11-25 - UCLA Diversity Statement.pdf",
+      "file_hash": "f0f412ebe4ad4cfe8780714d668a810763317a161ab47c7f3b397a2fa6c93425",
+      "document_type": "resume",
+      "date_processed": "2025-10-31T12:36:23.345048",
+      "date_from_filename": "2024-11-25",
+      "extraction_success": true
+    },
+    "my_documents/converted/AJB CV Feb 2014 CSULB.pdf": {
+      "filepath": "my_documents/converted/AJB CV Feb 2014 CSULB.pdf",
+      "file_hash": "dc9b513e471c7130b6e0712e71d17b94078e50c905520dc3db99095bbcdfd3c4",
+      "document_type": "resume",
+      "date_processed": "2025-10-31T12:36:24.525038",
+      "date_from_filename": null,
+      "extraction_success": true
+    },
+    "my_documents/converted/2015 - 06 - 29 - theater aspen.pdf": {
+      "filepath": "my_documents/converted/2015 - 06 - 29 - theater aspen.pdf",
+      "file_hash": "c4d362e37e9dfb68a30c9b33e87b645dec37b9a47118f211a8b620bb95f7b9c7",
+      "document_type": "cover_letter",
+      "date_processed": "2025-10-31T12:36:24.595456",
+      "date_from_filename": null,
+      "extraction_success": true
+    }
+  }
+}
