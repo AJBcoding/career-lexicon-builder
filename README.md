@@ -82,6 +82,43 @@ lexicons/
 └── .state.json                  # Processing state (for incremental updates)
 ```
 
+## Socratic Career Application Skills
+
+After generating your lexicons, use the Socratic career skills for job applications:
+
+**Skills installed in:** `~/.claude/skills/career/`
+
+### Quick Workflow
+
+1. **Analyze job description**
+   ```
+   "Analyze this job description" [paste/upload JD]
+   ```
+
+2. **Tailor resume**
+   ```
+   "Tailor my resume for this role" [upload resume]
+   ```
+
+3. **Plan cover letter**
+   ```
+   "Analyze my fit and plan my cover letter"
+   ```
+
+4. **Draft materials**
+   ```
+   "Develop my cover letter narrative"
+   "Help me draft the cover letter"
+   ```
+
+**See:** `~/.claude/skills/career/README.md` for detailed skill documentation
+
+**Principles:**
+- All content verified against your lexicons
+- No fabrication - every statement traceable
+- Socratic dialogue guides process
+- Evidence trails in all outputs
+
 ## Project Structure
 
 ```
