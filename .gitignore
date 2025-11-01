@@ -75,3 +75,6 @@ data/processed/documents.json
 *.log
 *.tmp
 temp/
+
+# Git worktrees
+.worktrees/
