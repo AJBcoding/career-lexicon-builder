@@ -1,3 +1,5 @@
+
+
 # Socratic Career Skills - Quick Start Guide
 
 **Get started with your personalized career application assistant in 3 steps.**

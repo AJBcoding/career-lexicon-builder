@@ -1,467 +1,195 @@
 # Career Lexicon Builder
 
-**A comprehensive Python toolkit for analyzing career documents and building reusable lexicon files**
+Transform your career history into actionable resources for job applications through AI-powered analysis and Socratic career skills.
 
-Transform your career documents (resumes, cover letters, biographical statements) into intelligent, searchable lexicons that capture your themes, qualifications, storytelling patterns, and keyword usage.
+## What This Does
 
-## What It Does
+The Career Lexicon Builder is a two-part system:
 
-The Career Lexicon Builder analyzes your existing career documents to create four reusable lexicon files:
+1. **Lexicon Generation (Phase 3)** - Analyzes your resumes, cover letters, and CVs using Claude AI to create four comprehensive lexicons documenting your career philosophy, achievements, narratives, and language patterns.
 
-1. **My Values** (`my_values.md`) - Recurring themes and values from your career narrative
-2. **Resume Variations** (`resume_variations.md`) - Qualification phrasing variations and examples
-3. **Storytelling Patterns** (`storytelling_patterns.md`) - Narrative patterns catalog for cover letters
-4. **Usage Index** (`usage_index.md`) - Keyword usage index with context and confidence scores
-
-## Features
-
-- **Automatic Document Classification**: Identifies resumes, cover letters, and biographical statements
-- **Multi-Format Support**: PDF, Word (.docx), plain text (.txt, .md), Apple Pages (.pages)
-- **Semantic Analysis**: Uses sentence transformers for intelligent similarity detection
-- **Incremental Processing**: Only processes new or modified documents
-- **State Management**: Tracks document hashes for efficient updates
-- **Comprehensive Testing**: 331+ tests with 100% pass rate
+2. **Socratic Career Skills (Phase 4)** - Five interactive Claude Code skills that guide you through crafting job-specific materials using the Socratic method, ensuring every statement is grounded in your authentic experience.
 
 ## Quick Start
 
-### Installation
+### Prerequisites
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/career-lexicon-builder.git
-cd career-lexicon-builder
-
-# Create virtual environment
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+# Python 3.8+
+python3 --version
 
 # Install dependencies
 pip install -r requirements.txt
+
+# Set up Claude API key
+export ANTHROPIC_API_KEY="your-api-key-here"
 ```
 
-### Basic Usage
+### 1. Generate Your Lexicons (One-Time Setup)
 
-```python
-from core.orchestrator import run_full_pipeline
+Place your career documents (PDFs, .pages, .docx, etc.) in `my_documents/converted/` and run:
 
-# Process all documents and generate lexicons
-result = run_full_pipeline(
-    input_dir="my_documents/",
-    output_dir="lexicons/"
-)
-
-print(f"Processed {result['statistics']['documents_processed']} documents")
-print(f"Found {result['statistics']['themes_found']} themes")
+```bash
+python3 run_llm_analysis.py
 ```
 
-### Incremental Updates
+This will:
+- Analyze all your career documents
+- Generate 4 lexicons in `lexicons_llm/`:
+  - `philosophy_and_values.md` - Core beliefs and principles
+  - `achievements.md` - Hierarchical record of accomplishments
+  - `narrative_patterns.md` - Storytelling frameworks and examples
+  - `language_bank.md` - Professional terminology and phrasing
 
-```python
-from core.orchestrator import run_incremental_update
+**Cost:** ~$1-2 per run (3-4 minutes for 37 PDFs, 47MB)
 
-# Only process new or modified documents
-result = run_incremental_update(
-    input_dir="my_documents/",
-    output_dir="lexicons/"
-)
+### 2. Use the Socratic Skills (Per Job Application)
 
-print(f"New documents: {result['statistics']['new_documents']}")
-print(f"Modified documents: {result['statistics']['modified_documents']}")
+The skills are installed in `~/.claude/skills/career/`:
+
+1. **job-description-analysis** - Analyze job postings to understand true requirements
+2. **resume-alignment** - Craft targeted resumes from your lexicons
+3. **job-fit-analysis** - Validate alignment between you and the role
+4. **cover-letter-voice** - Develop authentic cover letter strategies
+5. **collaborative-writing** - Write materials with citation verification
+
+See [QUICKSTART_SOCRATIC_SKILLS.md](QUICKSTART_SOCRATIC_SKILLS.md) for detailed usage.
+
+## How It Works
+
+### Phase 3: LLM Lexicon Generation
+
+```
+my_documents/converted/ → run_llm_analysis.py → lexicons_llm/
+        (PDFs, .docx, etc.)        (Claude API)       (4 markdown files)
 ```
 
-### Output Files
+**Key Features:**
+- Interpretive analysis (understands context and meaning)
+- Hierarchical organization (from high-level to specific)
+- Source citations (every claim links to original document)
+- Incremental updates (only processes new/changed files)
 
-After processing, you'll find these files in your output directory:
+**Architecture:**
+- `analyzers/llm_analyzer.py` - Claude API integration
+- `analyzers/llm_prompt_templates.py` - Specialized prompts for each lexicon
+- `generators/hierarchical_generator.py` - Markdown output formatting
+- `run_llm_analysis.py` - Main entry point
+
+### Phase 4: Socratic Career Skills
+
+Interactive workflows using the Socratic method:
 
 ```
-lexicons/
-├── my_values.md                 # Themes and values from your career
-├── resume_variations.md         # Qualification phrasing variations
-├── storytelling_patterns.md     # Narrative patterns catalog
-├── usage_index.md               # Keyword usage with context
-└── .state.json                  # Processing state (for incremental updates)
+Job Description → job-description-analysis → Understanding
+     ↓
+Lexicons + Job Understanding → resume-alignment → Targeted Resume
+     ↓
+Resume + Job → job-fit-analysis → Alignment Validation
+     ↓
+Fit Analysis + Lexicons → cover-letter-voice → Cover Letter Strategy
+     ↓
+Strategy + Lexicons → collaborative-writing → Final Materials
 ```
 
-## Socratic Career Application Skills
+**Key Features:**
+- Socratic questioning (refines thinking through dialogue)
+- Lexicon grounding (every achievement cites source)
+- Anti-fabrication safeguards (prevents invention of false claims)
+- Iterative refinement (multiple review cycles)
 
-After generating your lexicons, use the Socratic career skills for job applications:
+**Documentation:**
+- [SOCRATIC_SKILLS_SUMMARY.md](SOCRATIC_SKILLS_SUMMARY.md) - System overview
+- [QUICKSTART_SOCRATIC_SKILLS.md](QUICKSTART_SOCRATIC_SKILLS.md) - User guide
+- [DesignDocuments/2025-10-31-socratic-career-skills-system-design.md](DesignDocuments/2025-10-31-socratic-career-skills-system-design.md) - Technical design
 
-**Skills installed in:** `~/.claude/skills/career/`
-
-### Quick Workflow
-
-1. **Analyze job description**
-   ```
-   "Analyze this job description" [paste/upload JD]
-   ```
-
-2. **Tailor resume**
-   ```
-   "Tailor my resume for this role" [upload resume]
-   ```
-
-3. **Plan cover letter**
-   ```
-   "Analyze my fit and plan my cover letter"
-   ```
-
-4. **Draft materials**
-   ```
-   "Develop my cover letter narrative"
-   "Help me draft the cover letter"
-   ```
-
-**See:** `~/.claude/skills/career/README.md` for detailed skill documentation
-
-**Principles:**
-- All content verified against your lexicons
-- No fabrication - every statement traceable
-- Socratic dialogue guides process
-- Evidence trails in all outputs
-
-## Project Structure
+## Repository Structure
 
 ```
 career-lexicon-builder/
-├── core/                        # Core coordination and processing
-│   ├── orchestrator.py          # Central pipeline coordinator
-│   ├── document_processor.py    # Document classification and extraction
-│   ├── state_manager.py         # State and manifest management
-│   └── confidence_scorer.py     # Confidence calculation
-├── analyzers/                   # Analysis modules (Phase 3)
-│   ├── themes_analyzer.py       # Theme detection and clustering
-│   ├── qualifications_analyzer.py  # Qualification extraction
-│   ├── narratives_analyzer.py   # Narrative pattern detection
-│   └── keywords_analyzer.py     # Keyword indexing
-├── generators/                  # Lexicon generators (Phase 4)
-│   ├── themes_lexicon_generator.py
-│   ├── qualifications_lexicon_generator.py
-│   ├── narratives_lexicon_generator.py
-│   └── keywords_lexicon_generator.py
-├── utils/                       # Utilities
-│   ├── text_extraction.py       # Multi-format text extraction (.pages, etc)
-│   ├── similarity.py            # Semantic similarity utilities
-│   └── date_parser.py           # Date extraction from filenames
-├── templates/                   # Markdown templates for lexicon output
-├── tests/                       # 331+ comprehensive tests
-├── README.md                    # This file
-└── README_ORCHESTRATOR.md       # Detailed orchestrator documentation
+├── README.md                           # This file
+├── PHASES.md                           # Project evolution documentation
+├── QUICKSTART_SOCRATIC_SKILLS.md       # Skills user guide
+├── SOCRATIC_SKILLS_SUMMARY.md          # Skills system overview
+│
+├── analyzers/                          # Phase 3: LLM Analysis
+│   ├── llm_analyzer.py                 # Claude API integration
+│   └── llm_prompt_templates.py         # Lexicon-specific prompts
+│
+├── generators/                         # Phase 3: Output Generation
+│   └── hierarchical_generator.py       # Markdown lexicon formatting
+│
+├── core/                               # Document Processing
+│   ├── document_processor.py           # Document classification
+│   ├── orchestrator.py                 # Document ingestion
+│   └── state_manager.py                # Incremental update tracking
+│
+├── utils/                              # Utilities
+│   ├── text_extraction.py              # Extract from PDF, .docx, etc.
+│   └── date_parser.py                  # Parse dates from filenames
+│
+├── my_documents/                       # Input
+│   └── converted/                      # Your career documents (PDFs, etc.)
+│
+├── lexicons_llm/                       # Output
+│   ├── philosophy_and_values.md
+│   ├── achievements.md
+│   ├── narrative_patterns.md
+│   └── language_bank.md
+│
+└── ~/.claude/skills/career/            # Phase 4: Socratic Skills
+    ├── job-description-analysis/
+    ├── resume-alignment/
+    ├── job-fit-analysis/
+    ├── cover-letter-voice/
+    └── collaborative-writing/
 ```
 
-## Implementation Status
+## Project Evolution
 
-### Phase 1: Foundation (✅ Complete)
-- Date parsing from filenames
-- Text extraction from multiple formats
-- Apple Pages (.pages) file support
-- **55 tests passing**
+See [PHASES.md](PHASES.md) for the complete story of how this project evolved from initial concept through two major pivots to the current production-ready system.
 
-### Phase 2: Document Processing (✅ Complete)
-- Document classification (resume/cover letter/bio)
-- Confidence scoring system
-- State management with manifest persistence
-- Multi-format text extraction
-- **82 tests passing**
-
-### Phase 3: Analysis Modules (✅ Complete)
-- Themes analyzer with semantic clustering
-- Qualifications analyzer with variations
-- Narratives analyzer for storytelling patterns
-- Keywords analyzer with context tracking
-- **119 tests passing**
-
-### Phase 4: Lexicon Generators (✅ Complete)
-- Themes → my_values.md
-- Qualifications → resume_variations.md
-- Narratives → storytelling_patterns.md
-- Keywords → usage_index.md
-- **40 tests passing**
-
-### Phase 5: Central Orchestrator (✅ Complete)
-- Full pipeline coordination
-- Incremental update support
-- Error handling and logging
-- Statistics tracking
-- **22 tests passing**
-
-### Phase 6: Testing & Polish (🔄 In Progress)
-- Integration test validation
-- Manual end-to-end testing
-- Documentation (README_ORCHESTRATOR.md)
-- Performance profiling
-
-### Phase 7: Documentation & Deployment (🔜 Next)
-- Final user guide
-- Code polish and cleanup
-- Production deployment
-
-**Total: 331+ tests, 100% passing**
-
-## Test Coverage
-
-Run the comprehensive test suite:
-
-```bash
-# All tests (331+ tests)
-python -m pytest tests/ -v
-
-# Fast tests only (skip slow integration tests)
-python -m pytest tests/ -v -k "not Pipeline and not Incremental"
-
-# Orchestrator tests only (22 tests)
-python -m pytest tests/test_orchestrator.py -v
-
-# Specific module tests
-python -m pytest tests/test_themes_analyzer.py -v
-python -m pytest tests/test_qualifications_analyzer.py -v
-```
-
-## Performance Notes
-
-### First Run
-- Downloads semantic similarity models (~500MB)
-- Takes 20-30 minutes for first run
-- Models cached locally at `~/.cache/sentence-transformers/`
-
-### Subsequent Runs
-- Much faster (models already cached)
-- 10 documents: 2-5 minutes
-- 50 documents: 10-20 minutes
-- 100+ documents: 30-60 minutes
-
-### Incremental Updates
-- Only processes new/modified documents
-- Significantly faster than full pipeline
-- State tracked in `.state.json`
-
-## API Reference
-
-### Core Functions
-
-#### `run_full_pipeline(input_dir, output_dir)`
-
-Process all documents and generate complete lexicons.
-
-**Parameters:**
-- `input_dir` (str): Directory containing input documents
-- `output_dir` (str): Directory for generated lexicons
-
-**Returns:**
-```python
-{
-    "success": bool,
-    "statistics": {
-        "documents_processed": int,
-        "themes_found": int,
-        "qualifications_found": int,
-        "narratives_found": int,
-        "keywords_found": int
-    },
-    "errors": list[str]
-}
-```
-
-#### `run_incremental_update(input_dir, output_dir)`
-
-Process only new or modified documents.
-
-**Parameters:**
-- `input_dir` (str): Directory containing input documents
-- `output_dir` (str): Directory for generated lexicons
-
-**Returns:**
-```python
-{
-    "success": bool,
-    "statistics": {
-        "documents_processed": int,
-        "new_documents": int,
-        "modified_documents": int,
-        "unchanged_documents": int,
-        "themes_found": int,
-        "qualifications_found": int,
-        "narratives_found": int,
-        "keywords_found": int
-    },
-    "errors": list[str]
-}
-```
-
-For detailed API documentation, see [README_ORCHESTRATOR.md](README_ORCHESTRATOR.md).
+**TL;DR:** Started with conceptual Socratic skills, tried semantic similarity (too literal), pivoted to LLM-based analysis (works!), then implemented executable Socratic skills. The semantic analysis code has been archived in the `archive/phase2-semantic-analysis` branch.
 
 ## Documentation
 
-- **[README_ORCHESTRATOR.md](README_ORCHESTRATOR.md)** - Detailed orchestrator usage guide
-- **[DesignDocuments/](DesignDocuments/)** - Architecture and design documents
-- **[DevArtifacts/](DevArtifacts/)** - Phase handoff documents and implementation notes
+- **For Users:**
+  - [QUICKSTART_SOCRATIC_SKILLS.md](QUICKSTART_SOCRATIC_SKILLS.md) - How to use the skills
+  - [README_LLM_ANALYSIS.md](README_LLM_ANALYSIS.md) - Lexicon generation details
 
-## Supported File Formats
+- **For Developers:**
+  - [HANDOFF.md](HANDOFF.md) - Development handoff guide
+  - [PHASES.md](PHASES.md) - Project evolution
+  - [DesignDocuments/2025-10-31-llm-based-analysis-design.md](DesignDocuments/2025-10-31-llm-based-analysis-design.md) - LLM system design
+  - [DesignDocuments/2025-10-31-socratic-career-skills-system-design.md](DesignDocuments/2025-10-31-socratic-career-skills-system-design.md) - Skills system design
 
-- `.pages` (Apple Pages)
-- `.pdf` (PDF documents)
-- `.docx` (Microsoft Word)
-- `.txt` (Plain text)
-- `.md` (Markdown)
-
-Documents are automatically classified based on content analysis.
-
-## Error Handling
-
-The system handles errors gracefully:
-
-```python
-result = run_full_pipeline("docs/", "output/")
-
-if not result['success']:
-    print("Errors occurred:")
-    for error in result['errors']:
-        print(f"  - {error}")
-else:
-    print("Success! Lexicons generated.")
-```
-
-Common error scenarios:
-- Invalid or missing input directory
-- Unsupported file formats (skipped automatically)
-- Corrupted files (logged and skipped)
-- Permission errors
-
-## Troubleshooting
-
-### Issue: Models downloading slowly
-
-**Solution:** This is normal on first run. The semantic similarity models (~500MB) are downloaded and cached. Subsequent runs will be much faster.
-
-### Issue: No output files generated
-
-**Solution:** Check that your input directory contains supported file formats and that the output directory is writable.
-
-### Issue: "No module named 'core.orchestrator'"
-
-**Solution:** Ensure you're running from the project root directory and have activated the virtual environment.
-
-### Issue: Tests failing
-
-**Solution:** Ensure all dependencies are installed (`pip install -r requirements.txt`) and you're using Python 3.9+.
-
-## Example Workflows
-
-### Workflow 1: Initial Processing
-
-```python
-from core.orchestrator import run_full_pipeline
-
-# Process all your career documents
-result = run_full_pipeline(
-    input_dir="~/Documents/Career/",
-    output_dir="~/Lexicons/"
-)
-
-print(f"Processed {result['statistics']['documents_processed']} documents")
-print(f"Generated 4 lexicon files in ~/Lexicons/")
-```
-
-### Workflow 2: Adding New Documents
-
-```python
-from core.orchestrator import run_incremental_update
-
-# Add new resume or cover letter to ~/Documents/Career/
-# Then run incremental update
-
-result = run_incremental_update(
-    input_dir="~/Documents/Career/",
-    output_dir="~/Lexicons/"
-)
-
-print(f"New: {result['statistics']['new_documents']}")
-print(f"Lexicons updated!")
-```
-
-### Workflow 3: Batch Processing
-
-```python
-from core.orchestrator import run_full_pipeline
-
-directories = [
-    "resumes/",
-    "cover_letters/",
-    "bios/"
-]
-
-for dir_path in directories:
-    result = run_full_pipeline(
-        input_dir=dir_path,
-        output_dir=f"lexicons/{dir_path.strip('/')}"
-    )
-    print(f"{dir_path}: {result['statistics']['documents_processed']} docs")
-```
-
-## Development
-
-### Running Tests
+## Testing
 
 ```bash
-# Activate virtual environment
-source .venv/bin/activate
+# Run all tests (331 tests, 100% pass rate)
+pytest
 
-# Run all tests
-python -m pytest tests/ -v
-
-# Run with coverage
-python -m pytest tests/ --cov=core --cov=analyzers --cov=generators
-
-# Run specific test file
-python -m pytest tests/test_orchestrator.py -v
+# Run specific test suite
+pytest tests/test_llm_analyzer.py
 ```
 
-### Code Style
+**Note:** Tests were written for the archived Phase 2 semantic system. The LLM-based system (Phase 3) is tested through actual usage and manual validation of generated lexicons.
 
-This project follows:
-- PEP 8 style guide
-- Type hints for all functions
-- Comprehensive docstrings
-- 80-character line length (where reasonable)
+## Cost & Performance
 
-## Requirements
+**Lexicon Generation (Phase 3):**
+- 37 PDFs (47MB): ~3-4 minutes, $1-2
+- Incremental updates: Only processes changed files
+- One-time setup, re-run when adding new documents
 
-- Python 3.9+
-- Dependencies (see `requirements.txt`):
-  - `sentence-transformers` - Semantic similarity analysis
-  - `scikit-learn` - Clustering and similarity metrics
-  - `python-docx` - Word document processing
-  - `PyPDF2` - PDF text extraction
-  - `pytest` - Testing framework
-
-## Contributing
-
-Contributions welcome! Please:
-1. Fork the repository
-2. Create a feature branch
-3. Add tests for new functionality
-4. Ensure all tests pass
-5. Submit a pull request
+**Skills Usage (Phase 4):**
+- Free to use (runs in Claude Code)
+- Interactive sessions, no batch costs
 
 ## License
 
-MIT License - See LICENSE file for details
+This is a personal project for career development. Not licensed for redistribution.
 
-## Acknowledgments
+## Deprecated Code
 
-Built with:
-- [sentence-transformers](https://www.sbert.net/) for semantic analysis
-- [scikit-learn](https://scikit-learn.org/) for clustering
-- [pytest](https://pytest.org/) for testing
-
-## Contact
-
-For issues or questions:
-- File an issue in the project repository
-- Check existing tests for usage examples
-- Review documentation in `README_ORCHESTRATOR.md`
-
----
-
-**Version**: 1.0.0
-**Last Updated**: 2025-10-29
-**Status**: Production Ready (Phases 1-5 Complete)
+The original semantic similarity system (Phase 2) has been archived in the `archive/phase2-semantic-analysis` branch. See [PHASES.md](PHASES.md) for why it was deprecated and how the LLM-based approach differs.
