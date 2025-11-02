@@ -302,6 +302,58 @@ def classify_document(filename: str) -> DocumentCategory:
     return DocumentCategory.OTHER
 
 
+def format_document_references(file_entries: List[FileEntry]) -> str:
+    """
+    Format document references as markdown.
+
+    Args:
+        file_entries: List of file entries
+
+    Returns:
+        Formatted markdown string
+    """
+    # Group by category
+    by_category: Dict[DocumentCategory, List[FileEntry]] = {}
+
+    for entry in file_entries:
+        if entry.category not in by_category:
+            by_category[entry.category] = []
+        by_category[entry.category].append(entry)
+
+    # Sort each category by date (newest first)
+    for category in by_category:
+        by_category[category].sort(
+            key=lambda e: (e.date or datetime.min),
+            reverse=True
+        )
+
+    # Build markdown
+    lines = ["## Files Referenced", ""]
+
+    # Process categories in order
+    for category in DocumentCategory:
+        if category not in by_category or not by_category[category]:
+            continue
+
+        lines.append(f"### {category.value}")
+
+        for entry in by_category[category]:
+            # Format with date prefix if available
+            if entry.date:
+                date_str = entry.date.strftime('%Y-%m-%d')
+                # Check if filename already has date
+                if entry.filename.startswith(date_str):
+                    lines.append(f"- {entry.filename}")
+                else:
+                    lines.append(f"- {date_str} {entry.filename}")
+            else:
+                lines.append(f"- {entry.filename}")
+
+        lines.append("")  # Blank line between categories
+
+    return '\n'.join(lines)
+
+
 def discover_documents(converted_dir: Path) -> List[Path]:
     """
     Discover all documents in converted directory.
@@ -417,6 +469,14 @@ def main():
             count = category_counts[category]
             if count > 0:
                 print(f"  {category.value}: {count}")
+
+        # Format document references
+        print(f"\n{'='*60}")
+        print("FORMATTED OUTPUT")
+        print(f"{'='*60}\n")
+
+        formatted_output = format_document_references(file_entries)
+        print(formatted_output)
 
     except FileNotFoundError as e:
         print(f"Error: {e}")
