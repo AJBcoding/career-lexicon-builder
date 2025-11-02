@@ -8,6 +8,7 @@ Usage:
 
 import argparse
 import os
+import shutil
 from pathlib import Path
 from typing import List, Dict, Optional
 from datetime import datetime
@@ -17,6 +18,28 @@ from enum import Enum
 from utils.date_parser import extract_date_from_filename
 from utils.text_extraction import extract_text_from_document
 import re
+
+
+def backup_lexicons() -> Path:
+    """
+    Create backup of lexicon files before modification.
+
+    Returns:
+        Path to backup directory
+    """
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    backup_dir = Path(f"lexicons_llm_backup_{timestamp}")
+
+    lexicon_dir = Path("lexicons_llm")
+
+    if not lexicon_dir.exists():
+        raise FileNotFoundError(f"Lexicon directory not found: {lexicon_dir}")
+
+    print(f"Creating backup: {backup_dir}")
+    shutil.copytree(lexicon_dir, backup_dir)
+    print(f"  ✓ Backup created\n")
+
+    return backup_dir
 
 
 class DocumentCategory(Enum):
@@ -444,7 +467,20 @@ def main():
     args = parser.parse_args()
 
     print("Appending document references to lexicons...")
-    print(f"Dry run mode: {args.dry_run}")
+    print(f"Dry run mode: {args.dry_run}\n")
+
+    # Create backup (unless dry-run)
+    if not args.dry_run:
+        try:
+            backup_dir = backup_lexicons()
+            print(f"Note: Backup saved to {backup_dir}")
+            print(f"You can restore with: rm -rf lexicons_llm && mv {backup_dir} lexicons_llm\n")
+        except Exception as e:
+            print(f"Warning: Could not create backup: {e}")
+            response = input("Continue anyway? [y/N]: ").strip().lower()
+            if response != 'y':
+                print("Aborted.")
+                return 1
 
     converted_dir = Path("my_documents/converted")
 
