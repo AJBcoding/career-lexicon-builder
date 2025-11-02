@@ -136,6 +136,69 @@ def extract_date_from_pdf_content(file_path: Path) -> Optional[datetime]:
         return None
 
 
+def confirm_dates(file_entries: List[FileEntry]) -> List[FileEntry]:
+    """
+    Interactively confirm dates extracted from content.
+
+    Args:
+        file_entries: List of file entries
+
+    Returns:
+        Updated file entries with confirmed dates
+    """
+    entries_needing_confirmation = [
+        e for e in file_entries if e.needs_confirmation
+    ]
+
+    if not entries_needing_confirmation:
+        print("\nNo dates need confirmation.")
+        return file_entries
+
+    print(f"\n{'='*60}")
+    print(f"DATE CONFIRMATION ({len(entries_needing_confirmation)} files)")
+    print(f"{'='*60}\n")
+
+    for entry in entries_needing_confirmation:
+        print(f"File: {entry.filename}")
+
+        if entry.date:
+            print(f"Found Date: {entry.date.strftime('%Y-%m-%d')} (from PDF content)")
+        else:
+            print(f"Found Date: None")
+
+        while True:
+            response = input("Confirm? [y/n/enter new date (YYYY-MM-DD)]: ").strip()
+
+            if response.lower() in ['y', 'yes', '']:
+                # Accept the extracted date
+                if entry.date:
+                    # Generate new filename with date prefix
+                    entry.new_filename = f"{entry.date.strftime('%Y-%m-%d')} - {entry.filename}"
+                    print(f"  → Will rename to: {entry.new_filename}\n")
+                else:
+                    print(f"  → Keeping as-is (no date)\n")
+                break
+
+            elif response.lower() in ['n', 'no']:
+                # Ask for correct date
+                continue
+
+            else:
+                # Try to parse as date
+                try:
+                    new_date = datetime.strptime(response, '%Y-%m-%d')
+                    entry.date = new_date
+                    entry.date_source = 'user'
+                    entry.new_filename = f"{new_date.strftime('%Y-%m-%d')} - {entry.filename}"
+                    print(f"  → Will rename to: {entry.new_filename}\n")
+                    break
+                except ValueError:
+                    print("  Invalid date format. Please use YYYY-MM-DD or y/n")
+                    continue
+
+    return file_entries
+
+
 def discover_documents(converted_dir: Path) -> List[Path]:
     """
     Discover all documents in converted directory.
@@ -225,6 +288,12 @@ def main():
         print(f"\nDate extraction summary:")
         print(f"  Files with filename dates: {files_with_dates}")
         print(f"  Files needing date extraction: {files_needing_extraction}")
+
+        # Confirm dates that need it
+        if not args.dry_run:
+            file_entries = confirm_dates(file_entries)
+        else:
+            print("\n[DRY RUN] Skipping interactive confirmation")
 
     except FileNotFoundError as e:
         print(f"Error: {e}")
