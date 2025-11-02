@@ -186,12 +186,13 @@ def extract_date_from_pdf_content(file_path: Path) -> Optional[datetime]:
         return None
 
 
-def confirm_dates(file_entries: List[FileEntry]) -> List[FileEntry]:
+def confirm_dates(file_entries: List[FileEntry], skip_confirmation: bool = False) -> List[FileEntry]:
     """
     Interactively confirm dates extracted from content.
 
     Args:
         file_entries: List of file entries
+        skip_confirmation: If True, accept all extracted dates automatically
 
     Returns:
         Updated file entries with confirmed dates
@@ -215,6 +216,15 @@ def confirm_dates(file_entries: List[FileEntry]) -> List[FileEntry]:
             print(f"Found Date: {entry.date.strftime('%Y-%m-%d')} (from PDF content)")
         else:
             print(f"Found Date: None")
+
+        if skip_confirmation:
+            # Auto-accept extracted date
+            if entry.date:
+                entry.new_filename = f"{entry.date.strftime('%Y-%m-%d')} - {entry.filename}"
+                print(f"  → [AUTO-CONFIRMED] Will rename to: {entry.new_filename}\n")
+            else:
+                print(f"  → [AUTO-CONFIRMED] Keeping as-is (no date)\n")
+            continue
 
         while True:
             response = input("Confirm? [y/n/enter new date (YYYY-MM-DD)]: ").strip()
@@ -480,6 +490,11 @@ def main():
         action="store_true",
         help="Show what would be done without making changes"
     )
+    parser.add_argument(
+        "--skip-confirmation",
+        action="store_true",
+        help="Accept all extracted dates without confirmation"
+    )
     args = parser.parse_args()
 
     print("Appending document references to lexicons...")
@@ -553,7 +568,7 @@ def main():
 
         # Confirm dates that need it
         if not args.dry_run:
-            file_entries = confirm_dates(file_entries)
+            file_entries = confirm_dates(file_entries, skip_confirmation=args.skip_confirmation)
         else:
             print("\n[DRY RUN] Skipping interactive confirmation")
 
