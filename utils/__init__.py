@@ -18,11 +18,6 @@ from utils.text_extraction import (
     FormattingSpan
 )
 
-from utils.similarity import (
-    calculate_semantic_similarity,
-    cluster_similar_items
-)
-
 __all__ = [
     # Date parsing
     'extract_date_from_filename',
@@ -36,7 +31,4 @@ __all__ = [
     'ExtractionResult',
     'BulletPoint',
     'FormattingSpan',
-    # Similarity
-    'calculate_semantic_similarity',
-    'cluster_similar_items',
 ]
