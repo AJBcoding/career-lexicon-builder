@@ -2,8 +2,24 @@
 """
 Append document references to lexicon files.
 
+This script:
+1. Discovers documents in my_documents/converted/
+2. Extracts dates from filenames (using date_parser)
+3. For files without filename dates: extracts from PDF content
+4. Interactively confirms extracted dates
+5. Renames files to format: YYYY-MM-DD - filename.pdf
+6. Classifies documents by type (CV, Resume, Cover Letter, etc.)
+7. Formats as markdown lists sorted by date (newest first)
+8. Appends to all lexicon files in lexicons_llm/
+
 Usage:
-    python append_document_references.py [--dry-run]
+    # Dry run (no changes)
+    python3 append_document_references.py --dry-run
+
+    # Real run (interactive)
+    python3 append_document_references.py
+
+The script creates backups before modifying lexicons.
 """
 
 import argparse
