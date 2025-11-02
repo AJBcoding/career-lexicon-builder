@@ -384,7 +384,7 @@ def format_document_references(file_entries: List[FileEntry]) -> str:
                 if entry.filename.startswith(date_str):
                     lines.append(f"- {entry.filename}")
                 else:
-                    lines.append(f"- {date_str} {entry.filename}")
+                    lines.append(f"- {date_str} - {entry.filename}")
             else:
                 lines.append(f"- {entry.filename}")
 
