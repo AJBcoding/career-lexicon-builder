@@ -354,6 +354,61 @@ def format_document_references(file_entries: List[FileEntry]) -> str:
     return '\n'.join(lines)
 
 
+def append_to_lexicons(formatted_refs: str, dry_run: bool = False) -> None:
+    """
+    Append document references to all lexicon files.
+
+    Args:
+        formatted_refs: Formatted markdown document references
+        dry_run: If True, only show what would be done
+    """
+    lexicon_dir = Path("lexicons_llm")
+
+    if not lexicon_dir.exists():
+        print(f"Error: Lexicon directory not found: {lexicon_dir}")
+        return
+
+    lexicon_files = sorted(lexicon_dir.glob("*.md"))
+
+    if not lexicon_files:
+        print(f"Error: No lexicon files found in {lexicon_dir}")
+        return
+
+    print(f"\n{'='*60}")
+    print(f"APPENDING TO LEXICONS ({len(lexicon_files)} files)")
+    print(f"{'='*60}\n")
+
+    for lexicon_file in lexicon_files:
+        print(f"Processing: {lexicon_file.name}")
+
+        # Read current content
+        try:
+            with open(lexicon_file, 'r', encoding='utf-8') as f:
+                content = f.read()
+        except Exception as e:
+            print(f"  ✗ Error reading: {e}\n")
+            continue
+
+        # Check if "Files Referenced" already exists
+        if "## Files Referenced" in content:
+            print(f"  ⊗ Already contains 'Files Referenced' section - skipping\n")
+            continue
+
+        # Prepare new content
+        separator = "\n\n---\n\n"
+        new_content = content + separator + formatted_refs
+
+        if not dry_run:
+            try:
+                with open(lexicon_file, 'w', encoding='utf-8') as f:
+                    f.write(new_content)
+                print(f"  ✓ Updated\n")
+            except Exception as e:
+                print(f"  ✗ Error writing: {e}\n")
+        else:
+            print(f"  [DRY RUN] Would append {len(formatted_refs)} characters\n")
+
+
 def discover_documents(converted_dir: Path) -> List[Path]:
     """
     Discover all documents in converted directory.
@@ -471,12 +526,14 @@ def main():
                 print(f"  {category.value}: {count}")
 
         # Format document references
-        print(f"\n{'='*60}")
-        print("FORMATTED OUTPUT")
-        print(f"{'='*60}\n")
-
         formatted_output = format_document_references(file_entries)
-        print(formatted_output)
+
+        # Append to lexicons
+        append_to_lexicons(formatted_output, dry_run=args.dry_run)
+
+        print(f"\n{'='*60}")
+        print("COMPLETE")
+        print(f"{'='*60}")
 
     except FileNotFoundError as e:
         print(f"Error: {e}")
