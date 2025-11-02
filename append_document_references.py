@@ -12,10 +12,20 @@ from pathlib import Path
 from typing import List, Dict, Optional
 from datetime import datetime
 from dataclasses import dataclass
+from enum import Enum
 
 from utils.date_parser import extract_date_from_filename
 from utils.text_extraction import extract_text_from_document
 import re
+
+
+class DocumentCategory(Enum):
+    """Document categories for organization."""
+    CV = "CVs"
+    RESUME = "Resumes"
+    COVER_LETTER = "Cover Letters"
+    DIVERSITY_STATEMENT = "Diversity Statements"
+    OTHER = "Other"
 
 
 @dataclass
@@ -27,6 +37,7 @@ class FileEntry:
     date_source: str  # 'filename', 'content', or 'none'
     needs_confirmation: bool
     new_filename: Optional[str] = None
+    category: Optional[DocumentCategory] = None
 
 
 def extract_date_from_filename_safe(filename: str) -> Optional[datetime]:
@@ -257,6 +268,40 @@ def rename_files(file_entries: List[FileEntry], dry_run: bool = False) -> List[F
     return file_entries
 
 
+def classify_document(filename: str) -> DocumentCategory:
+    """
+    Classify document by filename.
+
+    Args:
+        filename: Document filename
+
+    Returns:
+        DocumentCategory
+    """
+    filename_lower = filename.lower()
+
+    # Check patterns in order of specificity
+
+    # Diversity statements (check before generic "letter")
+    if 'diversity' in filename_lower and 'statement' in filename_lower:
+        return DocumentCategory.DIVERSITY_STATEMENT
+
+    # CVs
+    if 'cv' in filename_lower or 'curriculum' in filename_lower:
+        return DocumentCategory.CV
+
+    # Resumes
+    if 'resume' in filename_lower:
+        return DocumentCategory.RESUME
+
+    # Cover letters
+    if 'cover' in filename_lower or 'letter' in filename_lower:
+        return DocumentCategory.COVER_LETTER
+
+    # Fallback
+    return DocumentCategory.OTHER
+
+
 def discover_documents(converted_dir: Path) -> List[Path]:
     """
     Discover all documents in converted directory.
@@ -355,6 +400,23 @@ def main():
 
         # Rename files
         file_entries = rename_files(file_entries, dry_run=args.dry_run)
+
+        # Classify documents
+        print(f"\n{'='*60}")
+        print("CLASSIFYING DOCUMENTS")
+        print(f"{'='*60}\n")
+
+        for entry in file_entries:
+            entry.category = classify_document(entry.filename)
+
+        # Summary by category
+        from collections import Counter
+        category_counts = Counter(e.category for e in file_entries)
+
+        for category in DocumentCategory:
+            count = category_counts[category]
+            if count > 0:
+                print(f"  {category.value}: {count}")
 
     except FileNotFoundError as e:
         print(f"Error: {e}")
