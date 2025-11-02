@@ -93,11 +93,22 @@ def extract_date_from_pdf_content(file_path: Path) -> Optional[datetime]:
             matches = re.findall(pattern, text_sample, re.IGNORECASE)
             for match in matches:
                 try:
-                    if date_format:
-                        date_str = '-'.join(match) if isinstance(match, tuple) else match
+                    if date_format is not None:
+                        # Format string patterns (YYYY-MM-DD, MM/DD/YYYY)
+                        # Reconstruct date string with correct separator
+                        if isinstance(match, tuple):
+                            # Determine separator from format string
+                            if '/' in date_format:
+                                date_str = '/'.join(match)
+                            elif '-' in date_format:
+                                date_str = '-'.join(match)
+                            else:
+                                date_str = ''.join(match)
+                        else:
+                            date_str = match
                         date_obj = datetime.strptime(date_str, date_format)
                     else:
-                        # Month DD, YYYY format
+                        # Month name pattern (Month DD, YYYY)
                         month_map = {
                             'january': 1, 'february': 2, 'march': 3, 'april': 4,
                             'may': 5, 'june': 6, 'july': 7, 'august': 8,
