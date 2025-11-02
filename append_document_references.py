@@ -199,6 +199,64 @@ def confirm_dates(file_entries: List[FileEntry]) -> List[FileEntry]:
     return file_entries
 
 
+def rename_files(file_entries: List[FileEntry], dry_run: bool = False) -> List[FileEntry]:
+    """
+    Rename files that have new filenames.
+
+    Args:
+        file_entries: List of file entries
+        dry_run: If True, only show what would be renamed
+
+    Returns:
+        Updated file entries with new paths
+    """
+    entries_to_rename = [e for e in file_entries if e.new_filename]
+
+    if not entries_to_rename:
+        print("\nNo files need renaming.")
+        return file_entries
+
+    print(f"\n{'='*60}")
+    print(f"FILE RENAMING ({len(entries_to_rename)} files)")
+    print(f"{'='*60}\n")
+
+    # Check for collisions
+    existing_names = set(e.filename for e in file_entries)
+    collisions = []
+
+    for entry in entries_to_rename:
+        if entry.new_filename in existing_names:
+            collisions.append(entry.new_filename)
+
+    if collisions:
+        print("ERROR: Filename collisions detected:")
+        for name in collisions:
+            print(f"  - {name}")
+        print("\nAborting rename operation.")
+        return file_entries
+
+    # Perform renames
+    for entry in entries_to_rename:
+        old_path = entry.path
+        new_path = entry.path.parent / entry.new_filename
+
+        print(f"  {entry.filename}")
+        print(f"  -> {entry.new_filename}")
+
+        if not dry_run:
+            try:
+                old_path.rename(new_path)
+                entry.path = new_path
+                entry.filename = entry.new_filename
+                print(f"  ✓ Renamed\n")
+            except Exception as e:
+                print(f"  ✗ Error: {e}\n")
+        else:
+            print(f"  [DRY RUN]\n")
+
+    return file_entries
+
+
 def discover_documents(converted_dir: Path) -> List[Path]:
     """
     Discover all documents in converted directory.
@@ -294,6 +352,9 @@ def main():
             file_entries = confirm_dates(file_entries)
         else:
             print("\n[DRY RUN] Skipping interactive confirmation")
+
+        # Rename files
+        file_entries = rename_files(file_entries, dry_run=args.dry_run)
 
     except FileNotFoundError as e:
         print(f"Error: {e}")
