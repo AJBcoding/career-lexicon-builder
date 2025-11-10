@@ -1,0 +1,53 @@
+[
+  {
+    "text": "Anthony Byrnes",
+    "style": "CV Name",
+    "type": "paragraph"
+  },
+  {
+    "text": "EDUCATION",
+    "style": "Section Header",
+    "type": "paragraph"
+  },
+  {
+    "text": "1994 - 1997 California Institute of the Arts",
+    "style": "Timeline Entry",
+    "type": "paragraph",
+    "runs": [
+      {"text": "1994 - 1997 ", "style": null},
+      {"text": "California Institute of the Arts", "style": "Institution"}
+    ]
+  },
+  {
+    "text": "Master of Fine Arts, Acting",
+    "style": "Body Text",
+    "type": "paragraph"
+  },
+  {
+    "text": "PROFESSIONAL EXPERIENCE",
+    "style": "Section Header",
+    "type": "paragraph"
+  },
+  {
+    "text": "2023 - Present California State University Long Beach",
+    "style": "Timeline Entry",
+    "type": "paragraph",
+    "runs": [
+      {"text": "2023 - Present ", "style": null},
+      {"text": "California State University Long Beach", "style": "Institution"}
+    ]
+  },
+  {
+    "text": "Interim Associate Dean for Student Success and Outreach",
+    "style": "Timeline Entry",
+    "type": "paragraph",
+    "runs": [
+      {"text": "Interim Associate Dean for Student Success and Outreach", "style": "Job Title"}
+    ]
+  },
+  {
+    "text": "Oversee 12 department-based staff academic advisors.",
+    "style": "Body Text",
+    "type": "paragraph"
+  }
+]
