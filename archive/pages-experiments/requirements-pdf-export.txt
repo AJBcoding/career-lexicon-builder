@@ -1,0 +1,5 @@
+# PDF Export Dependencies
+# Install with: pip install -r requirements-pdf-export.txt
+
+markdown>=3.5.0
+weasyprint>=60.0

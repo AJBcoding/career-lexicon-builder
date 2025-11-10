@@ -76,5 +76,9 @@ data/processed/documents.json
 *.tmp
 temp/
 
+# Generated exports and outputs
+document-exports/
+career-applications/
+
 # Git worktrees
 .worktrees/
