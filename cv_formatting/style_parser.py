@@ -49,12 +49,12 @@ class StyleParser:
             props['italic'] = True
 
         # Font size
-        size_match = re.search(r'font-size.*?(\d+)\.00pt', props_text)
+        size_match = re.search(r'font-size.*?(\d+(?:\.\d+)?)pt', props_text)
         if size_match:
-            props['size'] = int(size_match.group(1))
+            props['size'] = float(size_match.group(1))
 
         # Font family
-        font_match = re.search(r"font-family:\s*'([^']+)'", props_text)
+        font_match = re.search(r"font-family:\s*['\"]([^'\"]+)['\"]", props_text)
         if font_match:
             props['font'] = font_match.group(1)
 
