@@ -80,5 +80,9 @@ temp/
 document-exports/
 career-applications/
 
+# Personal documents (keep existing tracked files, ignore new ones)
+my_documents/*.pages
+my_documents/*.docx
+
 # Git worktrees
 .worktrees/
