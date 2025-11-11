@@ -1,4 +1,4 @@
-"""Style consolidation mapping from 97 .pages styles to 12 semantic styles."""
+"""Style consolidation mapping from 97 .pages styles to 13 semantic styles."""
 from typing import Optional
 
 
@@ -93,4 +93,7 @@ def get_semantic_name(old_class: str) -> Optional[str]:
 
 def get_all_semantic_styles() -> set:
     """Get set of all unique semantic style names."""
-    return set(STYLE_CONSOLIDATION.values())
+    # Add Date Line style (for cover letters) to the set
+    styles = set(STYLE_CONSOLIDATION.values())
+    styles.add('Date Line')
+    return styles

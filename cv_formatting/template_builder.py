@@ -2,6 +2,7 @@
 from docx import Document
 from docx.shared import Pt, RGBColor
 from docx.enum.style import WD_STYLE_TYPE
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 from typing import Optional
 import logging
 
@@ -17,7 +18,7 @@ class TemplateBuilder:
 
     def create_template(self, output_path: str) -> bool:
         """
-        Create clean .docx template with 12 semantic styles.
+        Create clean .docx template with 13 semantic styles.
 
         Args:
             output_path: Where to save the template
@@ -36,6 +37,7 @@ class TemplateBuilder:
             self._create_bullet_standard_style(doc)
             self._create_bullet_gray_style(doc)
             self._create_bullet_emphasis_style(doc)
+            self._create_date_line_style(doc)
 
             # Create character styles
             self._create_play_title_style(doc)
@@ -145,3 +147,10 @@ class TemplateBuilder:
         """Create Gray Text character style (dates, secondary info)"""
         style = doc.styles.add_style('Gray Text', WD_STYLE_TYPE.CHARACTER)
         style.font.color.rgb = self.GRAY_RGB
+
+    def _create_date_line_style(self, doc: Document):
+        """Create Date Line paragraph style (for cover letters)"""
+        style = doc.styles.add_style('Date Line', WD_STYLE_TYPE.PARAGRAPH)
+        style.font.name = 'Helvetica'
+        style.font.size = Pt(11)
+        style.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.RIGHT
