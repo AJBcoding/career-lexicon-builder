@@ -1,8 +1,11 @@
 """Apply styles to document content using template."""
 from docx import Document
 from docx.shared import RGBColor, Pt, Inches
+from docx.oxml import parse_xml
+from docx.oxml.ns import nsdecls
 from typing import List, Dict, Any, Optional
 from pathlib import Path
+from lxml import etree
 import logging
 
 from cv_formatting.play_titles_lookup import PlayTitlesLookup
@@ -70,8 +73,10 @@ class StyleApplicator:
                 self._add_page_headers(doc, metadata)
 
             # Apply each content element
-            for item in content_mapping:
-                self._add_content_item(doc, item)
+            for i, item in enumerate(content_mapping):
+                prev_item = content_mapping[i-1] if i > 0 else None
+                next_item = content_mapping[i+1] if i < len(content_mapping)-1 else None
+                self._add_content_item(doc, item, prev_item, next_item)
 
             # Save formatted document
             doc.save(output_path)
@@ -82,7 +87,9 @@ class StyleApplicator:
             logger.error(f"Failed to apply styles: {e}")
             return False
 
-    def _add_content_item(self, doc: Document, item: Dict[str, Any]):
+    def _add_content_item(self, doc: Document, item: Dict[str, Any],
+                          prev_item: Optional[Dict[str, Any]] = None,
+                          next_item: Optional[Dict[str, Any]] = None):
         """Add single content item to document."""
         item_type = item.get('type', 'paragraph')
 
@@ -117,6 +124,14 @@ class StyleApplicator:
                 self._apply_section_header_formatting(para)
             elif style_name == 'RE Line':
                 self._apply_re_line_formatting(para)
+
+            # Normal spacing - overlap handled by floating signature positioning
+            if next_item and next_item.get('type') == 'image':
+                # Paragraph before signature (e.g., "Sincerely,")
+                para.paragraph_format.space_after = Pt(0)
+            elif prev_item and prev_item.get('type') == 'image':
+                # Paragraph after signature (e.g., "Anthony Byrnes")
+                para.paragraph_format.space_before = Pt(0)
 
     def _apply_section_header_formatting(self, para):
         """
@@ -238,11 +253,17 @@ class StyleApplicator:
             logger.warning(f"Signature image not found: {image_file}")
             return
 
-        # Add signature as image
+        # Add signature as inline image with minimal spacing and height
+        # Note: Floating images with overlap cause document corruption
+        # Using inline with tight spacing and smaller height instead
         para = doc.add_paragraph()
+        para.paragraph_format.space_before = Pt(0)
+        para.paragraph_format.space_after = Pt(0)
         run = para.add_run()
         try:
-            run.add_picture(str(image_file), width=Inches(1.5))
+            # Use smaller width and let height auto-scale
+            # This reduces the vertical space taken by the signature
+            run.add_picture(str(image_file), width=Inches(1.2))
             logger.info(f"Added signature image: {image_file}")
         except Exception as e:
             logger.error(f"Failed to add signature image: {e}")
