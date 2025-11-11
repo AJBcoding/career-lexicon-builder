@@ -52,10 +52,20 @@ def main():
     # Load content mapping
     try:
         with open(input_file) as f:
-            content_mapping = json.load(f)
+            data = json.load(f)
     except Exception as e:
         logger.error(f"Failed to parse input JSON: {e}")
         return 1
+
+    # Handle both old and new JSON formats
+    if isinstance(data, dict) and 'content' in data:
+        # New format with metadata
+        content_mapping = data['content']
+        metadata = data.get('document_metadata', {})
+    else:
+        # Old format (backward compatible)
+        content_mapping = data
+        metadata = {}
 
     # Get template (shared location for both CVs and cover letters)
     template_path = Path("cv_formatting/templates/career-documents-template.docx")
@@ -65,11 +75,21 @@ def main():
         logger.error("Run generate_cv_template.py first")
         return 1
 
+    # Get dictionary and signature paths
+    dictionary_path = Path.home() / ".claude/skills/format-cover-letter/play-titles-dictionary.yaml"
+    signature_path = Path.home() / ".claude/skills/format-cover-letter/signatures"
+
     # Apply styles
     logger.info(f"Formatting {len(content_mapping)} content items as {document_type}...")
-    applicator = StyleApplicator(str(template_path))
+    applicator = StyleApplicator(
+        str(template_path),
+        str(dictionary_path) if dictionary_path.exists() else None,
+        str(signature_path) if signature_path.exists() else None
+    )
 
-    if not applicator.apply_styles(content_mapping, str(output_file), document_type=document_type):
+    if not applicator.apply_styles(content_mapping, str(output_file),
+                                   document_type=document_type,
+                                   metadata=metadata):
         logger.error("Formatting failed")
         return 1
 

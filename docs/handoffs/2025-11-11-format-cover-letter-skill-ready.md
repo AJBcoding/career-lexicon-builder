@@ -21,13 +21,14 @@ Successfully implemented complete cover letter formatting system across 3 phases
 - ✅ All 24 tests passing (0 failures)
 
 ### Phase 3: Format-Cover-Letter Skill
-- ✅ Created `~/.claude/skills/career/format-cover-letter/` with:
+- ✅ Created `~/.claude/skills/format-cover-letter/` with:
   - `skill.md` (790 lines)
   - `style-mappings.yaml` (208 lines)
   - `learned-preferences.yaml` (empty, ready for learning)
 - ✅ UCLA CAO integration test passing
 - ✅ User documentation guide (408 lines)
 - ✅ README updated
+- Note: Skills must be at `~/.claude/skills/` root level (not nested in subdirectories)
 
 ### Merge & Cleanup
 - ✅ Code review completed (1 critical issue found and fixed)
@@ -40,7 +41,7 @@ Successfully implemented complete cover letter formatting system across 3 phases
 **Branch**: main
 **Commits**: 28 commits ahead of origin (includes 11 cover letter commits + merge)
 **Tests**: 24/24 passing
-**Skill Location**: `~/.claude/skills/career/format-cover-letter/`
+**Skill Location**: `~/.claude/skills/format-cover-letter/`
 **Template Location**: `cv_formatting/templates/career-documents-template.docx` (36KB)
 
 ## Why Skill Isn't Available Yet
@@ -116,14 +117,14 @@ Actually, style "Ivy Substation" as Institution instead of Play Title
 
 The skill should:
 1. Update the styling
-2. Save the preference to `~/.claude/skills/career/format-cover-letter/learned-preferences.yaml`
+2. Save the preference to `~/.claude/skills/format-cover-letter/learned-preferences.yaml`
 3. Remember this for future cover letters
 
 ## Files to Reference
 
 ### Skill Documentation
-- **Skill definition**: `~/.claude/skills/career/format-cover-letter/skill.md`
-- **Style mappings**: `~/.claude/skills/career/format-cover-letter/style-mappings.yaml`
+- **Skill definition**: `~/.claude/skills/format-cover-letter/skill.md`
+- **Style mappings**: `~/.claude/skills/format-cover-letter/style-mappings.yaml`
 - **User guide**: `docs/guides/format-cover-letter-skill-guide.md`
 
 ### Test Materials
@@ -159,12 +160,15 @@ This will back up:
 ### If skill doesn't appear after restart
 ```bash
 # Verify files exist
-ls -la ~/.claude/skills/career/format-cover-letter/
+ls -la ~/.claude/skills/format-cover-letter/
 
 # Should see:
 # - skill.md (23K)
 # - style-mappings.yaml (6K)
 # - learned-preferences.yaml (133 bytes)
+
+# Note: Skills must be at root level of ~/.claude/skills/
+# NOT nested in subdirectories like ~/.claude/skills/career/format-cover-letter/
 ```
 
 ### If formatting fails
@@ -197,7 +201,7 @@ After testing, you should have:
 If you encounter problems:
 1. Check `docs/guides/format-cover-letter-skill-guide.md` (FAQ section)
 2. Review test failures with `python3 -m pytest tests/test_cover_letter_formatting.py -v`
-3. Examine skill logic in `~/.claude/skills/career/format-cover-letter/skill.md`
+3. Examine skill logic in `~/.claude/skills/format-cover-letter/skill.md`
 
 ---
 
