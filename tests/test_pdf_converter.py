@@ -9,7 +9,7 @@ from cv_formatting.pdf_converter import PDFConverter
 def test_convert_docx_to_pdf(tmp_path):
     """Test converting .docx to PDF"""
     # Create test .docx (or use existing)
-    template = Path.home() / ".claude/skills/career/format-resume/cv-template.docx"
+    template = Path("cv_formatting/templates/career-documents-template.docx")
 
     if not template.exists():
         pytest.skip("Template not available")

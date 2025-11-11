@@ -6,7 +6,7 @@ from cv_formatting.style_applicator import StyleApplicator
 
 def test_apply_paragraph_style(tmp_path):
     """Test applying paragraph style to content"""
-    template = Path.home() / ".claude/skills/career/format-resume/cv-template.docx"
+    template = Path("cv_formatting/templates/career-documents-template.docx")
     output = tmp_path / "test-output.docx"
 
     content_mapping = [
@@ -37,7 +37,7 @@ def test_apply_paragraph_style(tmp_path):
 
 def test_apply_character_style_inline(tmp_path):
     """Test applying character style within paragraph"""
-    template = Path.home() / ".claude/skills/career/format-resume/cv-template.docx"
+    template = Path("cv_formatting/templates/career-documents-template.docx")
     output = tmp_path / "test-output.docx"
 
     content_mapping = [
