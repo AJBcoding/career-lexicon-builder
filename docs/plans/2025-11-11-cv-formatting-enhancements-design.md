@@ -165,110 +165,104 @@ section_patterns:
     detect_job_title_keywords: ["Dean", "Director", "Manager", "Producer"]
 ```
 
-## CVAnalyzer - Text to JSON
+## LLM-Based Analysis (Like Cover Letters)
 
-### Purpose
+### Core Principle: Intelligence in the Skill
 
-Parse raw CV text into structured JSON, detecting sections, timelines, bullets, and inline styles.
+**The format-resume skill (Claude) analyzes raw CV text**, just like format-cover-letter does. No Python regex patterns.
 
-### Detection Strategy
+### Why LLM Analysis?
 
-```python
-class CVAnalyzer:
-    """Convert raw CV text to structured JSON"""
+**Advantages:**
+- ✅ Understands semantic context (not just patterns)
+- ✅ Handles variations naturally ("PhD" vs "Ph.D." vs "Doctor of Philosophy")
+- ✅ Consistent with cover letter approach
+- ✅ Can explain reasoning to user
+- ✅ Learns from corrections through conversation
 
-    def __init__(self):
-        self.metadata_helper = MetadataHelper()
-        self.learning = LearningSystem()
+**Python helpers only:**
+- Load defaults from YAML
+- Find files
+- Generate dates
+- No semantic analysis
 
-    def analyze(self, raw_text: str) -> dict:
-        """Parse raw CV text into JSON structure"""
-        lines = raw_text.split('\n')
-        content = []
-        current_section = None
+### Analysis Workflow
 
-        for line in lines:
-            if not line.strip():
-                continue
-
-            # Detect element type
-            if self._is_name(line):
-                content.append({"text": line, "style": "CV Name", "type": "paragraph"})
-            elif self._is_section_header(line):
-                current_section = line.strip()
-                content.append({"text": line, "style": "Section Header", "type": "paragraph"})
-            elif self._is_timeline_entry(line):
-                content.append(self._parse_timeline(line))
-            elif self._is_bullet(line):
-                content.append(self._parse_bullet(line))
-            elif self._is_contact_info(line):
-                content.append(self._parse_contact(line))
-            else:
-                content.append({"text": line, "style": "Body Text", "type": "paragraph"})
-
-        # Apply learned patterns
-        content = self.learning.apply_learned_patterns(content)
-
-        return {
-            "document_metadata": self.metadata_helper.infer_cv_metadata(raw_text),
-            "content": content
-        }
+**1. User provides raw text:**
+```
+User: "Format this CV: [pastes raw text]"
 ```
 
-### Detection Rules
+**2. Skill (Claude) analyzes and creates JSON:**
+```
+I'll analyze your CV and create a structured format.
 
-**1. Section Headers**
-- ALL CAPS line
-- Standalone (not part of sentence)
-- Common keywords: EDUCATION, EXPERIENCE, SKILLS, etc.
-- Example: `EDUCATION` → Section Header
+I see:
+- Name: ANTHONY BYRNES (CV Name style)
+- Contact: Phone and email (Contact Info style)
+- Section: EDUCATION (Section Header - orange, 11pt)
+- Timeline: 2020-2024 California State University... (Timeline Entry with Institution inline)
+- Position: Interim Associate Dean... (Body Text with Job Title inline)
+- Bullets: Led $29M budget... (Bullet Standard)
 
-**2. Timeline Entries**
-- Start with date pattern: `2020-2024`, `2020 - Present`, `Fall 2020`
-- Followed by institution/company name
-- Example: `2020-2024  California State University, Long Beach`
+Here's my JSON interpretation:
+[shows JSON structure]
 
-**3. Inline Styles in Timelines**
-- **Institution:** Capitalized proper nouns after dates
-- Extract: `California State University, Long Beach` → Institution style
+Looks correct? (yes/show more/line X should be Y)
+```
 
-**4. Job Titles**
-- Bold/italic text or title keywords (Dean, Director, Manager)
-- Usually follows timeline entry
-- Example: `Interim Associate Dean, College of the Arts`
+**3. User confirms or corrects:**
+- `"yes"` → Proceed to formatting
+- `"Line 5 should be Body Text not Timeline Entry"` → Update JSON
+- `"show json"` → Display full JSON for manual editing
 
-**5. Bullets**
-- Line starts with bullet character: `•`, `-`, `*`
-- Or detected indentation pattern
-- Determines: Bullet Standard vs Bullet Gray vs Bullet Emphasis
+**4. Format and generate DOCX:**
+Uses existing StyleApplicator with confirmed JSON
 
-**6. Contact Info**
-- Phone pattern: `T: 213.305.3132` or `Phone: ...`
-- Email pattern: `E: email@domain.com` or `Email: ...`
+### No CVAnalyzer Class
 
-### User Confirmation Workflow
+Unlike the initial (incorrect) implementation, we **don't need a CVAnalyzer class**. The skill (Claude) does the analysis.
 
-1. **Parse & Present:**
-   ```
-   System: "Here's my interpretation (first 10 items):
+**Helper classes we DO need:**
+- `MetadataHelper` - Load defaults, find files (already exists)
+- `LearningSystem` - Apply learned preferences (new, simple)
 
-   1. CV Name: ANTHONY BYRNES
-   2. Contact Info: T: 213.305.3132
-   3. Contact Info: E: anthonybyrnes@mac.com
-   4. Section Header: EDUCATION
-   5. Timeline Entry: 2020-2024 California State University...
+### Learning System Integration
 
-   Looks correct? (yes/show json/line X should be Y)"
-   ```
+When user makes corrections:
+```
+User: "That committee role should be Gray Text"
 
-2. **User Responses:**
-   - `"yes"` → Proceed to formatting
-   - `"Line 5 should be Body Text"` → Update JSON, show again
-   - `"show json"` → Display full JSON for manual editing
+Skill: [Updates JSON, saves to learned-preferences.yaml]
+       "I've learned: committee roles → Gray Text"
 
-3. **Manual Editing:**
-   - User edits JSON directly if needed
-   - System validates and reformats
+Next time: Automatically applies Gray Text to committee roles
+```
+
+### Simplified Implementation
+
+**What we actually need to build:**
+
+1. **LearningSystem class** (`learning_system.py`)
+   - Load/save learned-preferences.yaml
+   - Apply learned style rules
+   - Simple pattern matching (no complex regex)
+
+2. **Extended MetadataHelper** (already mostly exists)
+   - Add `infer_cv_metadata()` method
+   - Load CV-specific defaults
+
+3. **Updated format-resume skill** (skill.md)
+   - LLM analyzes raw text → creates JSON
+   - Shows interpretation to user
+   - Applies learned patterns
+   - Calls StyleApplicator with JSON
+
+4. **Configuration files:**
+   - `defaults.yaml` - Contact info and CV preferences
+   - `learned-preferences.yaml` - Learning storage
+
+**That's it!** Much simpler than regex-based CVAnalyzer.
 
 ## Page Headers for CVs
 
@@ -604,17 +598,14 @@ Build all features together with TDD, single comprehensive commit.
    - Visual verification
    - Single comprehensive commit
 
-## Files to Create/Modify
+## Files to Create/Modify (LLM-Based Approach)
 
 ### New Files
 
 ```
-tests/test_cv_page_headers.py                    - Page header tests
-tests/test_cv_metadata_inference.py              - Metadata inference tests
-tests/test_cv_analyzer.py                        - Text parsing tests
+tests/test_cv_page_headers.py                    - Page header tests for CVs
 tests/test_cv_learning.py                        - Learning system tests
-cv_formatting/cv_analyzer.py                     - Text-to-JSON parser
-cv_formatting/learning_system.py                 - Learning system implementation
+cv_formatting/learning_system.py                 - Simple learning system (pattern matching)
 ~/.claude/skills/format-resume/defaults.yaml     - CV defaults config
 ~/.claude/skills/format-resume/learned-preferences.yaml  - Learning storage
 ```
@@ -622,18 +613,19 @@ cv_formatting/learning_system.py                 - Learning system implementatio
 ### Modified Files
 
 ```
-cv_formatting/metadata_inference.py              - Add CV metadata methods
-cv_formatting/style_applicator.py                - Add CV page header config
-~/.claude/skills/format-resume/skill.md          - Update documentation
+cv_formatting/metadata_inference.py              - Add infer_cv_metadata() method
+~/.claude/skills/format-resume/skill.md          - Update with LLM workflow
 ```
 
-### Shared (Already Exist)
+### Already Working (No Changes Needed)
 
 ```
-cv_formatting/style_applicator.py                - Page headers already working!
-cv_formatting/templates/career-documents-template.docx  - 19 styles
-format_cv.py                                     - Main formatter
+cv_formatting/style_applicator.py                - Page headers already implemented!
+cv_formatting/templates/career-documents-template.docx  - 19 styles template
+format_cv.py                                     - Main formatter script
 ```
+
+**Note:** No CVAnalyzer needed! Claude (the skill) does the semantic analysis.
 
 ## Success Criteria
 
