@@ -1,5 +1,6 @@
 """Apply styles to document content using template."""
 from docx import Document
+from docx.shared import RGBColor, Pt
 from typing import List, Dict, Any
 import logging
 
@@ -17,6 +18,7 @@ class StyleApplicator:
             template_path: Path to cv-template.docx
         """
         self.template_path = template_path
+        self.document_type = 'cv'  # Default to CV mode
 
     def apply_styles(self, content_mapping: List[Dict[str, Any]],
                      output_path: str, document_type: str = 'cv') -> bool:
@@ -42,6 +44,9 @@ class StyleApplicator:
             }]
         """
         try:
+            # Store document type for conditional formatting
+            self.document_type = document_type
+
             # Load template
             doc = Document(self.template_path)
 
@@ -75,4 +80,30 @@ class StyleApplicator:
                         run.style = run_data['style']
             else:
                 # Simple paragraph
-                doc.add_paragraph(item['text'], style=style_name)
+                para = doc.add_paragraph(item['text'], style=style_name)
+
+                # Apply context-aware formatting for Section Header
+                if style_name == 'Section Header':
+                    self._apply_section_header_formatting(para)
+
+    def _apply_section_header_formatting(self, para):
+        """
+        Apply context-aware formatting to Section Header paragraph.
+
+        CV mode: Orange (#FF6D49 = RGB(255, 109, 73)), 11pt, Bold
+        Cover letter mode: Black (RGB(0, 0, 0)), 13pt, Bold
+        """
+        if self.document_type == 'cv':
+            # CV formatting: orange, 11pt, bold
+            color = RGBColor(255, 109, 73)
+            size = Pt(11)
+        else:  # cover-letter
+            # Cover letter formatting: black, 13pt, bold
+            color = RGBColor(0, 0, 0)
+            size = Pt(13)
+
+        # Apply direct formatting to all runs in the paragraph
+        for run in para.runs:
+            run.font.color.rgb = color
+            run.font.size = size
+            run.font.bold = True
