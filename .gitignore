@@ -79,6 +79,8 @@ temp/
 # Generated exports and outputs
 document-exports/
 career-applications/
+outputs/
+tmp/
 
 # Personal documents (keep existing tracked files, ignore new ones)
 my_documents/*.pages
