@@ -57,8 +57,8 @@ def main():
         logger.error(f"Failed to parse input JSON: {e}")
         return 1
 
-    # Get template
-    template_path = Path.home() / ".claude/skills/career/format-resume/cv-template.docx"
+    # Get template (shared location for both CVs and cover letters)
+    template_path = Path("cv_formatting/templates/career-documents-template.docx")
 
     if not template_path.exists():
         logger.error(f"Template not found: {template_path}")
