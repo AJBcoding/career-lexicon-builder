@@ -191,10 +191,11 @@ posting_url: https://...
 - Skill documentation updated
 
 ### Ready for Testing ⏳
-- Job description matching with LLM
-- Metadata extraction from content
-- User confirmation workflow
-- End-to-end: raw text → formatted DOCX
+- ✅ Job description matching with LLM (tested with UCLA CAO)
+- ✅ Metadata extraction from content (tested with UCLA CAO)
+- ✅ User confirmation workflow (tested with UCLA CAO)
+- ✅ End-to-end: raw text → formatted DOCX (tested with UCLA CAO)
+- ✅ Page headers for multi-page cover letters (tested with UCLA CAO)
 
 ### Test Cases Needed
 1. **UCLA CAO letter** - Has matching job description
@@ -204,16 +205,59 @@ posting_url: https://...
 
 ---
 
+## Page Headers Implementation (NEW!)
+
+### Feature
+Multi-page cover letters now automatically include page headers on pages 2+.
+
+### Format
+**Page 1:** No header (clean first page)
+**Page 2+:** `ANTHONY BYRNES | Page 2` (left-aligned, bold, 10pt)
+
+### Usage
+Enable in JSON metadata:
+```json
+{
+  "document_metadata": {
+    "page_header": {
+      "enabled": true,
+      "left": "ANTHONY BYRNES",
+      "right": "Page"
+    }
+  }
+}
+```
+
+### Implementation
+- **File:** `cv_formatting/style_applicator.py:271-332`
+- **Method:** `_add_page_headers()`
+- **Tests:** `tests/test_page_headers.py` (2 tests, both passing)
+- **Approach:**
+  - Uses Word's "different first page" feature
+  - Page 1 header empty
+  - Pages 2+ show author name + page number field
+  - Page number uses Word field codes (`PAGE`)
+
+### TDD Process
+✅ Written test-first (RED-GREEN-REFACTOR)
+✅ Watched test fail before implementing
+✅ Implemented minimal code to pass
+✅ All tests pass (including existing tests)
+
+---
+
 ## Files Created/Modified
 
 **New Files:**
 ```
 cv_formatting/metadata_inference.py                127 lines
 ~/.claude/skills/format-cover-letter/defaults.yaml  1.0K
+tests/test_page_headers.py                         128 lines (page header tests)
 ```
 
-**Modified Skills:**
+**Modified Files:**
 ```
+cv_formatting/style_applicator.py                  +60 lines (_add_page_headers implementation)
 ~/.claude/skills/format-cover-letter/skill.md      293 lines (added inference section)
 ~/.claude/skills/format-resume/skill.md            170 lines (updated to 19 styles)
 ```
@@ -290,6 +334,8 @@ System handles the rest!
 3. **Extract recipient address** from job description content (not just company name)
 4. **Learn from confirmations** (save common recipient addresses)
 5. **Support multiple job descriptions** (let user choose if multiple matches)
+6. **Folder cleanup and clear indication of latest draft** (currently multiple versions make it unclear which is the latest)
+7. **Hyperlink email address** in contact block (make email clickable mailto: link)
 
 ### Documentation
 6. **Add examples** to base templates showing inference in action
@@ -315,6 +361,9 @@ System handles the rest!
 - ✅ Defaults configuration system
 - ✅ Skills updated and documented
 - ✅ Both format-cover-letter and format-resume consistent
+- ✅ Page headers implemented for multi-page cover letters
+- ✅ Test-driven development (TDD) followed for page headers
+- ✅ All tests passing (page headers + existing tests)
 
 ---
 

@@ -273,17 +273,121 @@ class StyleApplicator:
         Add page headers to document.
 
         Headers start from page 2 (not page 1).
+        Format matches Colburn style: gray text, 0.25" left indent, lowercase "page X"
         """
-        # Note: python-docx has limited header/footer support
-        # Headers apply to all pages or specific sections
-        # For now, we'll log that this feature needs manual setup
-        # or requires more complex section handling
-
         page_header = metadata.get('page_header', {})
         left_text = page_header.get('left', '')
         right_text = page_header.get('right', '')
 
-        # TODO: Implement proper page headers with section breaks
-        # For now, just log the intent
-        logger.info(f"Page headers requested: '{left_text}' | '{right_text}'")
-        logger.warning("Page header implementation requires manual setup in template")
+        if not left_text and not right_text:
+            return
+
+        # Enable different first page header
+        section = doc.sections[0]
+        section.different_first_page_header_footer = True
+
+        # First page header stays empty (already is by default)
+
+        # Add header for pages 2+
+        header = section.header
+        header_para = header.paragraphs[0] if header.paragraphs else header.add_paragraph()
+
+        # Use XML to set up paragraph with proper tab stops and formatting
+        # This matches the Colburn style exactly
+        from docx.oxml import OxmlElement
+        from docx.oxml.ns import qn
+
+        # Set up paragraph properties
+        pPr = header_para._element.get_or_add_pPr()
+
+        # Add tab stops (right-aligned tab at 9360 twips = 6.5 inches from left)
+        # No left indent - header should align with body text
+        tabs = OxmlElement('w:tabs')
+        tab = OxmlElement('w:tab')
+        tab.set(qn('w:val'), 'right')
+        tab.set(qn('w:pos'), '9360')  # 6.5 inches
+        tabs.append(tab)
+        pPr.append(tabs)
+
+        # Add left text (author name + organization)
+        # Format: "ANTHONY BYRNES - Title Case Position"
+        if left_text:
+            run = header_para.add_run(left_text)
+            run.bold = True
+            run.font.name = 'Helvetica'
+            run.font.size = Pt(10)
+            run.font.color.rgb = RGBColor(128, 128, 128)  # Gray
+
+        # Add single tab to push page number to the right
+        if left_text and right_text:
+            run = header_para.add_run('\t')
+            run.font.name = 'Helvetica'
+
+        # Add right text ("page") with page number field
+        if right_text:
+            # Add "page " text (lowercase, 10pt, bold, gray, Helvetica)
+            page_run = header_para.add_run(right_text + ' ')
+            page_run.bold = True
+            page_run.font.name = 'Helvetica'
+            page_run.font.size = Pt(10)
+            page_run.font.color.rgb = RGBColor(128, 128, 128)  # Gray
+
+            # Build complete field XML with all runs
+            # Note: Page number may display as {PAGE} until Word updates fields.
+            # Word will auto-update when document is opened/printed/saved.
+            # User can manually update with F9 or right-click > Update Field.
+            field_begin = parse_xml(
+                '<w:r xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+                '<w:rPr>'
+                '<w:rFonts w:ascii="Helvetica" w:hAnsi="Helvetica"/>'
+                '<w:b/>'
+                '<w:sz w:val="20"/>'
+                '<w:color w:val="808080"/>'
+                '</w:rPr>'
+                '<w:fldChar w:fldCharType="begin"/>'
+                '</w:r>'
+            )
+
+            field_instr = parse_xml(
+                '<w:r xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+                '<w:rPr>'
+                '<w:rFonts w:ascii="Helvetica" w:hAnsi="Helvetica"/>'
+                '<w:b/>'
+                '<w:sz w:val="20"/>'
+                '<w:color w:val="808080"/>'
+                '</w:rPr>'
+                '<w:instrText xml:space="preserve"> PAGE </w:instrText>'
+                '</w:r>'
+            )
+
+            field_sep = parse_xml(
+                '<w:r xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+                '<w:rPr>'
+                '<w:rFonts w:ascii="Helvetica" w:hAnsi="Helvetica"/>'
+                '<w:b/>'
+                '<w:sz w:val="20"/>'
+                '<w:color w:val="808080"/>'
+                '</w:rPr>'
+                '<w:fldChar w:fldCharType="separate"/>'
+                '</w:r>'
+            )
+
+            field_end = parse_xml(
+                '<w:r xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+                '<w:rPr>'
+                '<w:rFonts w:ascii="Helvetica" w:hAnsi="Helvetica"/>'
+                '<w:b/>'
+                '<w:sz w:val="20"/>'
+                '<w:color w:val="808080"/>'
+                '</w:rPr>'
+                '<w:fldChar w:fldCharType="end"/>'
+                '</w:r>'
+            )
+
+            # Append all field components
+            header_para._element.append(field_begin)
+            header_para._element.append(field_instr)
+            header_para._element.append(field_sep)
+            header_para._element.append(field_end)
+
+        logger.info(f"Added page headers (Colburn style): '{left_text}' | '{right_text}'")
