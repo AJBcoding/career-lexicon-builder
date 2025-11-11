@@ -19,13 +19,14 @@ class StyleApplicator:
         self.template_path = template_path
 
     def apply_styles(self, content_mapping: List[Dict[str, Any]],
-                     output_path: str) -> bool:
+                     output_path: str, document_type: str = 'cv') -> bool:
         """
         Apply styles to content and save document.
 
         Args:
             content_mapping: List of content elements with styles
             output_path: Where to save formatted document
+            document_type: Type of document ('cv' or 'cover-letter')
 
         Returns:
             True if successful

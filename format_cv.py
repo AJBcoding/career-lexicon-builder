@@ -3,12 +3,13 @@
 Format CV content using template styles.
 
 Usage:
-    python format_cv.py input.json output.docx [--preview]
+    python format_cv.py input.json output.docx [--preview] [--document-type {cv,cover-letter}]
 
 Input format: JSON with content mapping
 """
 import sys
 import json
+import argparse
 from pathlib import Path
 from cv_formatting.style_applicator import StyleApplicator
 from cv_formatting.pdf_converter import PDFConverter
@@ -21,20 +22,28 @@ logger = logging.getLogger(__name__)
 
 def main():
     """Format CV from content mapping."""
-    if len(sys.argv) < 3:
-        print("Usage: python format_cv.py <input.json> <output.docx> [--preview]")
-        print("\nInput JSON format:")
-        print('[')
-        print('  {"text": "EDUCATION", "style": "Section Header", "type": "paragraph"},')
-        print('  {"text": "Body text", "style": "Body Text", "type": "paragraph"}')
-        print(']')
-        print("\nOptions:")
-        print("  --preview  Generate PDF and page images for visual verification")
+    # Parse arguments
+    parser = argparse.ArgumentParser(
+        description='Format CV or cover letter content using template styles.'
+    )
+    parser.add_argument('input', help='Input JSON file with content mapping')
+    parser.add_argument('output', help='Output DOCX file path')
+    parser.add_argument('--preview', action='store_true',
+                        help='Generate PDF and page images for visual verification')
+    parser.add_argument('--document-type', choices=['cv', 'cover-letter'],
+                        default='cv',
+                        help='Type of document to format (default: cv)')
+
+    try:
+        args = parser.parse_args()
+    except SystemExit as e:
+        # argparse calls sys.exit on error, catch it and return error code
         return 1
 
-    input_file = Path(sys.argv[1])
-    output_file = Path(sys.argv[2])
-    preview = '--preview' in sys.argv
+    input_file = Path(args.input)
+    output_file = Path(args.output)
+    preview = args.preview
+    document_type = args.document_type
 
     if not input_file.exists():
         logger.error(f"Input file not found: {input_file}")
@@ -57,10 +66,10 @@ def main():
         return 1
 
     # Apply styles
-    logger.info(f"Formatting {len(content_mapping)} content items...")
+    logger.info(f"Formatting {len(content_mapping)} content items as {document_type}...")
     applicator = StyleApplicator(str(template_path))
 
-    if not applicator.apply_styles(content_mapping, str(output_file)):
+    if not applicator.apply_styles(content_mapping, str(output_file), document_type=document_type):
         logger.error("Formatting failed")
         return 1
 
