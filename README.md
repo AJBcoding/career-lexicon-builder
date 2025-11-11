@@ -55,6 +55,29 @@ The skills are installed in `~/.claude/skills/career/`:
 
 See [QUICKSTART_SOCRATIC_SKILLS.md](QUICKSTART_SOCRATIC_SKILLS.md) for detailed usage.
 
+## Cover Letter Formatting
+
+Format academic and professional cover letters with semantic styling.
+
+### Quick Start
+
+```
+User: Format this cover letter: [paste content]
+Claude: [Analyzes, styles, generates formatted .docx + preview]
+```
+
+### Features
+- Automatic structure detection (date, salutation, headers, body, closing)
+- Content mention styling (institutions, positions, productions)
+- Context-aware formatting (black thematic headers, not orange)
+- Learning system remembers corrections
+- Shares template with CV formatting
+
+### Learn More
+- [Format Cover Letter Skill Guide](docs/guides/format-cover-letter-skill-guide.md)
+- [CV Template Guide](docs/guides/cv-template-guide.md)
+- [System Design](docs/plans/2025-11-10-cover-letter-formatting-design.md)
+
 ## How It Works
 
 ### Phase 3: LLM Lexicon Generation
