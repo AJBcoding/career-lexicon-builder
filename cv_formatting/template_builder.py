@@ -90,8 +90,10 @@ class TemplateBuilder:
         style.font.name = 'Helvetica'
         style.font.size = Pt(9)
 
-        # Bullet formatting
+        # Bullet formatting with hanging indent (matches list numbering)
+        # Note: List numbering will be applied separately when formatting documents
         style.paragraph_format.left_indent = Pt(72)
+        style.paragraph_format.first_line_indent = Pt(-18)  # 0.25" hanging for bullet (18pt = 360 twentieths)
 
     def _create_bullet_gray_style(self, doc: Document):
         """Create Bullet Gray style (bullets for dates/education)"""
@@ -100,7 +102,9 @@ class TemplateBuilder:
         style.font.size = Pt(9)
         style.font.color.rgb = self.GRAY_RGB
 
+        # Bullet formatting with hanging indent
         style.paragraph_format.left_indent = Pt(72)
+        style.paragraph_format.first_line_indent = Pt(-18)  # 0.25" hanging for bullet
 
     def _create_bullet_emphasis_style(self, doc: Document):
         """Create Bullet Emphasis style (bold italic bullets)"""
@@ -110,7 +114,9 @@ class TemplateBuilder:
         style.font.bold = True
         style.font.italic = True
 
+        # Bullet formatting with hanging indent
         style.paragraph_format.left_indent = Pt(72)
+        style.paragraph_format.first_line_indent = Pt(-18)  # 0.25" hanging for bullet
 
     def _create_play_title_style(self, doc: Document):
         """Create Play Title character style (bold italic for productions)"""
