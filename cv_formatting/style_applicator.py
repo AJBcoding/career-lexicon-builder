@@ -72,6 +72,9 @@ class StyleApplicator:
             if metadata.get('page_header', {}).get('enabled'):
                 self._add_page_headers(doc, metadata)
 
+            # Track first section for spacing adjustments
+            self.first_section_seen = False
+
             # Apply each content element
             for i, item in enumerate(content_mapping):
                 prev_item = content_mapping[i-1] if i > 0 else None
@@ -121,7 +124,9 @@ class StyleApplicator:
 
             # Apply context-aware formatting for Section Header or RE Line
             if style_name == 'Section Header':
-                self._apply_section_header_formatting(para)
+                is_first_section = not self.first_section_seen
+                self._apply_section_header_formatting(para, is_first_section)
+                self.first_section_seen = True
             elif style_name == 'RE Line':
                 self._apply_re_line_formatting(para)
 
@@ -133,13 +138,17 @@ class StyleApplicator:
                 # Paragraph after signature (e.g., "Anthony Byrnes")
                 para.paragraph_format.space_before = Pt(0)
 
-    def _apply_section_header_formatting(self, para):
+    def _apply_section_header_formatting(self, para, is_first_section=False):
         """
         Apply context-aware formatting to Section Header paragraph.
 
         Section headers are ALWAYS orange for both CVs and cover letters.
         CV mode: Orange, 11pt, Bold
         Cover letter mode: Orange, 13pt, Bold
+
+        Args:
+            para: The paragraph to format
+            is_first_section: True if this is the first section header in the document
         """
         # Always orange for both document types
         color = RGBColor(255, 109, 73)
@@ -154,6 +163,10 @@ class StyleApplicator:
             run.font.color.rgb = color
             run.font.size = size
             run.font.bold = True
+
+        # First section should have no space before
+        if is_first_section:
+            para.paragraph_format.space_before = Pt(0)
 
     def _apply_re_line_formatting(self, para):
         """
