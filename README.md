@@ -1,5 +1,9 @@
 # Career Lexicon Builder
 
+[![Backend CI](https://github.com/AJBcoding/career-lexicon-builder/workflows/Backend%20CI/badge.svg)](https://github.com/AJBcoding/career-lexicon-builder/actions)
+[![Frontend CI](https://github.com/AJBcoding/career-lexicon-builder/workflows/Frontend%20CI/badge.svg)](https://github.com/AJBcoding/career-lexicon-builder/actions)
+[![Docker Build](https://github.com/AJBcoding/career-lexicon-builder/workflows/Docker%20Build%20and%20Push/badge.svg)](https://github.com/AJBcoding/career-lexicon-builder/actions)
+
 Transform your career history into actionable resources for job applications through AI-powered analysis and Socratic career skills.
 
 ## What This Does

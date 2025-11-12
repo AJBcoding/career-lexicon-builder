@@ -1,0 +1,49 @@
+name: Deploy to Production
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'production' }}
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Deploy to server
+      env:
+        DEPLOY_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+        DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      run: |
+        echo "Deployment configuration here"
+        echo "Environment: ${{ github.event.inputs.environment || 'production' }}"
+        echo "Tag: ${{ github.ref_name }}"
+        # Add actual deployment commands:
+        # - SSH into server
+        # - Pull latest images
+        # - docker-compose up -d
+        #
+        # Example deployment script:
+        # mkdir -p ~/.ssh
+        # echo "$DEPLOY_KEY" > ~/.ssh/deploy_key
+        # chmod 600 ~/.ssh/deploy_key
+        # ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST << 'EOF'
+        #   cd /opt/career-lexicon-builder
+        #   docker-compose pull
+        #   docker-compose up -d
+        #   docker-compose ps
+        # EOF
