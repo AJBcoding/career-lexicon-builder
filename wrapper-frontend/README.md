@@ -1,16 +1,83 @@
-# React + Vite
+# Career Lexicon Wrapper - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React frontend for managing job application projects with Claude Code integration.
 
-Currently, two official plugins are available:
+## Setup
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```bash
+cd wrapper-frontend
+npm install
+```
 
-## React Compiler
+## Configuration
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Create `.env`:
+```
+VITE_API_BASE_URL=http://localhost:8000
+```
 
-## Expanding the ESLint configuration
+## Run
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Development:
+```bash
+npm run dev
+```
+
+Build:
+```bash
+npm run build
+```
+
+Preview production build:
+```bash
+npm run preview
+```
+
+## Features
+
+### Project Dashboard
+- Create new job application projects
+- View all projects with status and last updated date
+- Click to open project workspace
+
+### Project Workspace
+- Upload job posting files (drag-and-drop or click-to-select)
+- Invoke Claude Code skills (currently: job-description-analysis)
+- View skill execution results
+
+### File Upload
+- Drag-and-drop support
+- Multiple file upload
+- Visual feedback for drag state
+- Upload progress indication
+
+## Architecture
+
+```
+wrapper-frontend/
+├── src/
+│   ├── components/              # React components
+│   │   ├── ProjectDashboard.jsx # Project list and creation
+│   │   ├── ProjectWorkspace.jsx # Project detail view
+│   │   └── FileUpload.jsx       # File upload widget
+│   ├── services/                # API integration
+│   │   ├── api.js               # Axios client
+│   │   └── projectService.js    # Project API calls
+│   ├── config.js                # Environment configuration
+│   └── App.jsx                  # Main application component
+├── public/                      # Static assets
+└── index.html                   # HTML entry point
+```
+
+## Development
+
+**Lint:**
+```bash
+npm run lint
+```
+
+**Build for production:**
+```bash
+npm run build
+```
+The built files will be in the `dist/` directory.
