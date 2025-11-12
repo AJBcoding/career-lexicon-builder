@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import FileUpload from './FileUpload';
 import PreviewPanel from './PreviewPanel';
 import ChatInterface from './ChatInterface';
+import SuggestionsPanel from './SuggestionsPanel';
 import api from '../services/api';
 
 function ProjectWorkspace({ project, onBack }) {
@@ -207,6 +208,9 @@ function ProjectWorkspace({ project, onBack }) {
               </span>
             )}
           </div>
+
+          {/* Smart Suggestions Panel */}
+          <SuggestionsPanel project={project} />
 
           {/* Streaming Output */}
           {streaming && (

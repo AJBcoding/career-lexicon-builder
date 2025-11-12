@@ -7,9 +7,20 @@ from api.websocket import router as websocket_router
 from api.preview import router as preview_router
 from api.auth import router as auth_router
 from api.chat import router as chat_router
+from api.suggestions import router as suggestions_router
+from utils.logging_config import setup_logging
+from middleware.logging import LoggingMiddleware
 import os
+import logging
+
+# Initialize logging at startup
+setup_logging(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Career Lexicon Wrapper API")
+
+# Add logging middleware (before CORS)
+app.add_middleware(LoggingMiddleware)
 
 # CORS configuration - supports both development and production
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
@@ -34,6 +45,18 @@ app.include_router(files_router)
 app.include_router(websocket_router)
 app.include_router(preview_router)
 app.include_router(chat_router)
+app.include_router(suggestions_router)
+
+@app.on_event("startup")
+async def startup_event():
+    logger.info("Application starting", extra={
+        'version': '1.0.0',
+        'environment': os.getenv('ENVIRONMENT', 'development')
+    })
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    logger.info("Application shutting down")
 
 @app.get("/health")
 async def health_check():
