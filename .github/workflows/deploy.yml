@@ -23,27 +23,133 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Deploy to server
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata for Backend
+      id: meta-backend
+      uses: docker/metadata-action@v4
+      with:
+        images: ghcr.io/${{ github.repository }}-backend
+        tags: |
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=sha
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Build and push Backend image
+      uses: docker/build-push-action@v4
+      with:
+        context: ./wrapper-backend
+        push: true
+        tags: ${{ steps.meta-backend.outputs.tags }}
+        labels: ${{ steps.meta-backend.outputs.labels }}
+        cache-from: type=registry,ref=ghcr.io/${{ github.repository }}-backend:buildcache
+        cache-to: type=registry,ref=ghcr.io/${{ github.repository }}-backend:buildcache,mode=max
+
+    - name: Extract metadata for Frontend
+      id: meta-frontend
+      uses: docker/metadata-action@v4
+      with:
+        images: ghcr.io/${{ github.repository }}-frontend
+        tags: |
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=sha
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Build and push Frontend image
+      uses: docker/build-push-action@v4
+      with:
+        context: ./wrapper-frontend
+        push: true
+        tags: ${{ steps.meta-frontend.outputs.tags }}
+        labels: ${{ steps.meta-frontend.outputs.labels }}
+        cache-from: type=registry,ref=ghcr.io/${{ github.repository }}-frontend:buildcache
+        cache-to: type=registry,ref=ghcr.io/${{ github.repository }}-frontend:buildcache,mode=max
+
+    - name: Deploy to production server
+      uses: appleboy/ssh-action@v1.0.0
       env:
-        DEPLOY_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
-        DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-        DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        IMAGE_TAG: ${{ github.ref_name }}
+      with:
+        host: ${{ secrets.DEPLOY_HOST }}
+        username: ${{ secrets.DEPLOY_USER }}
+        key: ${{ secrets.DEPLOY_SSH_KEY }}
+        port: ${{ secrets.DEPLOY_PORT || 22 }}
+        envs: IMAGE_TAG
+        script: |
+          set -e
+
+          echo "Deploying version: $IMAGE_TAG"
+
+          # Navigate to application directory
+          cd /opt/wrapper-app
+
+          # Pull latest images
+          echo "Pulling Docker images..."
+          docker-compose -f docker-compose.prod.yml pull
+
+          # Backup database before deployment
+          echo "Creating database backup..."
+          mkdir -p backups
+          docker-compose exec -T postgres pg_dump -U $POSTGRES_USER $POSTGRES_DB > backups/pre-deploy-$(date +%Y%m%d-%H%M%S).sql || echo "Backup skipped (no existing database)"
+
+          # Stop services gracefully
+          echo "Stopping services..."
+          docker-compose -f docker-compose.prod.yml down
+
+          # Start services
+          echo "Starting services..."
+          docker-compose -f docker-compose.prod.yml up -d
+
+          # Wait for backend to be healthy
+          echo "Waiting for backend to be healthy..."
+          sleep 10
+
+          # Run database migrations
+          echo "Running database migrations..."
+          docker-compose exec -T backend alembic upgrade head
+
+          # Health check
+          echo "Running health check..."
+          max_attempts=30
+          attempt=0
+          until curl -f http://localhost:8000/health || [ $attempt -eq $max_attempts ]; do
+            echo "Health check attempt $((attempt+1))/$max_attempts..."
+            sleep 2
+            attempt=$((attempt+1))
+          done
+
+          if [ $attempt -eq $max_attempts ]; then
+            echo "Health check failed! Rolling back..."
+            docker-compose -f docker-compose.prod.yml down
+            # Restore from backup if needed
+            echo "Deployment failed. Please check logs and restore manually if needed."
+            exit 1
+          fi
+
+          echo "Deployment successful!"
+          docker-compose ps
+
+          # Clean up old images
+          docker image prune -f
+
+    - name: Notify deployment status
+      if: always()
       run: |
-        echo "Deployment configuration here"
-        echo "Environment: ${{ github.event.inputs.environment || 'production' }}"
-        echo "Tag: ${{ github.ref_name }}"
-        # Add actual deployment commands:
-        # - SSH into server
-        # - Pull latest images
-        # - docker-compose up -d
-        #
-        # Example deployment script:
-        # mkdir -p ~/.ssh
-        # echo "$DEPLOY_KEY" > ~/.ssh/deploy_key
-        # chmod 600 ~/.ssh/deploy_key
-        # ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST << 'EOF'
-        #   cd /opt/career-lexicon-builder
-        #   docker-compose pull
-        #   docker-compose up -d
-        #   docker-compose ps
-        # EOF
+        if [ "${{ job.status }}" == "success" ]; then
+          echo "Deployment completed successfully"
+          echo "Version: ${{ github.ref_name }}"
+          echo "Environment: ${{ github.event.inputs.environment || 'production' }}"
+        else
+          echo "Deployment failed"
+          echo "Check logs for details"
+        fi

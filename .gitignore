@@ -88,3 +88,12 @@ my_documents/*.docx
 
 # Git worktrees
 .worktrees/
+
+# Production deployment
+backups/
+applications/
+*.sql
+*.sql.gz
+nginx/ssl/*.pem
+nginx/ssl/*.key
+.env.production
