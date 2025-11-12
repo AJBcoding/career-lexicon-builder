@@ -1,7 +1,9 @@
 from services.anthropic_service import AnthropicService
 from typing import Callable, Awaitable, Optional, Dict, Any
 import json
+import logging
 
+logger = logging.getLogger(__name__)
 
 class ChatService:
     """Service for handling conversational interactions with natural language intent classification"""
@@ -110,9 +112,21 @@ If the message is unclear or conversational (like "hello", "thanks", etc), use:
                 response_text = response_text[json_start:json_end].strip()
 
             intent = json.loads(response_text)
+
+            logger.info("Intent classified", extra={
+                'intent': intent.get('skill'),
+                'confidence': intent.get('confidence', 0),
+                'user_message_length': len(message),
+                'reasoning': intent.get('reasoning', '')[:100]  # Truncated
+            })
+
             return intent
 
         except Exception as e:
+            logger.warning("Intent classification failed, using fallback", extra={
+                'error': str(e),
+                'error_type': type(e).__name__
+            })
             # Fallback: use simple pattern matching
             return self._fallback_intent_classification(message)
 
@@ -157,11 +171,19 @@ If the message is unclear or conversational (like "hello", "thanks", etc), use:
         Returns:
             Dict with execution results
         """
+        logger.info("Handling chat message", extra={
+            'project_id': project_id,
+            'message_length': len(message)
+        })
+
         # Classify intent
         intent = await self.classify_intent(message, context)
 
         # If conversational, just respond conversationally
         if intent["skill"] == "conversational":
+            logger.info("Handling conversational message", extra={
+                'project_id': project_id
+            })
             response = await self._handle_conversational(message, context, on_token)
             return {
                 "intent": intent,
@@ -170,6 +192,12 @@ If the message is unclear or conversational (like "hello", "thanks", etc), use:
             }
 
         # Build prompt for the skill
+        logger.info("Executing skill from chat", extra={
+            'project_id': project_id,
+            'skill_name': intent["skill"],
+            'confidence': intent.get('confidence', 0)
+        })
+
         skill_prompt = self._build_skill_prompt(intent["skill"], message, context)
 
         # Execute skill with streaming
@@ -179,6 +207,12 @@ If the message is unclear or conversational (like "hello", "thanks", etc), use:
             max_tokens=4096,
             on_token=on_token
         )
+
+        logger.info("Chat message handled", extra={
+            'project_id': project_id,
+            'skill_name': intent["skill"],
+            'type': 'skill_execution'
+        })
 
         return {
             "intent": intent,

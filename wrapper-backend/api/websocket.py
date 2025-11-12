@@ -2,6 +2,9 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from typing import Dict, List
 import json
 import asyncio
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -16,6 +19,11 @@ class ConnectionManager:
             self.active_connections[project_id] = []
         self.active_connections[project_id].append(websocket)
 
+        logger.info("WebSocket connected", extra={
+            'project_id': project_id,
+            'total_connections': len(self.active_connections[project_id])
+        })
+
         # Send welcome message
         await self.send_personal_message(
             {"type": "connection", "status": "connected", "project_id": project_id},
@@ -26,8 +34,15 @@ class ConnectionManager:
         if project_id in self.active_connections:
             if websocket in self.active_connections[project_id]:
                 self.active_connections[project_id].remove(websocket)
+            remaining = len(self.active_connections[project_id])
             if not self.active_connections[project_id]:
                 del self.active_connections[project_id]
+                remaining = 0
+
+            logger.info("WebSocket disconnected", extra={
+                'project_id': project_id,
+                'remaining_connections': remaining
+            })
 
     async def send_personal_message(self, message: dict, websocket: WebSocket):
         await websocket.send_json(message)
@@ -83,12 +98,18 @@ async def websocket_endpoint(websocket: WebSocket, project_id: str):
                 )
 
     except WebSocketDisconnect:
+        logger.debug("WebSocket disconnect event", extra={'project_id': project_id})
         manager.disconnect(websocket, project_id)
 
         # Stop watching if no more clients for this project
         if project_id not in manager.active_connections or not manager.active_connections[project_id]:
             watcher_manager.stop_watching_project(project_id)
     except Exception as e:
+        logger.error("WebSocket error", extra={
+            'project_id': project_id,
+            'error': str(e),
+            'error_type': type(e).__name__
+        }, exc_info=True)
         manager.disconnect(websocket, project_id)
 
         # Stop watching if no more clients for this project
