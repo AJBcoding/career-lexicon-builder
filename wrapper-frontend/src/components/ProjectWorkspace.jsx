@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import FileUpload from './FileUpload';
+import PreviewPanel from './PreviewPanel';
 import api from '../services/api';
 
 function ProjectWorkspace({ project, onBack }) {
   const [processing, setProcessing] = useState(false);
   const [result, setResult] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   const handleAnalyzeJob = async () => {
     setProcessing(true);
@@ -57,6 +59,71 @@ function ProjectWorkspace({ project, onBack }) {
           <pre>{JSON.stringify(result, null, 2)}</pre>
         </div>
       )}
+
+      <div style={{ marginTop: '30px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', height: '600px' }}>
+        <div>
+          <h3>Files</h3>
+          <div style={{ border: '1px solid #ddd', borderRadius: '5px', padding: '10px' }}>
+            <button
+              onClick={() => setSelectedFile('01-job-analysis.md')}
+              style={{
+                display: 'block',
+                width: '100%',
+                padding: '10px',
+                marginBottom: '5px',
+                textAlign: 'left',
+                background: selectedFile === '01-job-analysis.md' ? '#e3f2fd' : 'white',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              01-job-analysis.md
+            </button>
+            <button
+              onClick={() => setSelectedFile('02-fit-analysis.md')}
+              style={{
+                display: 'block',
+                width: '100%',
+                padding: '10px',
+                marginBottom: '5px',
+                textAlign: 'left',
+                background: selectedFile === '02-fit-analysis.md' ? '#e3f2fd' : 'white',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              02-fit-analysis.md
+            </button>
+            <button
+              onClick={() => setSelectedFile('03-cover-letter.md')}
+              style={{
+                display: 'block',
+                width: '100%',
+                padding: '10px',
+                textAlign: 'left',
+                background: selectedFile === '03-cover-letter.md' ? '#e3f2fd' : 'white',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              03-cover-letter.md
+            </button>
+          </div>
+        </div>
+        <div>
+          <h3>Preview</h3>
+          <div style={{ border: '1px solid #ddd', borderRadius: '5px', height: '100%' }}>
+            <PreviewPanel
+              projectId={project.project_id}
+              filename={selectedFile}
+              type="html"
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
