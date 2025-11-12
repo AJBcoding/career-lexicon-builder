@@ -26,3 +26,18 @@ def test_invoke_skill_endpoint(client):
         assert response.status_code == 200
         data = response.json()
         assert data["success"] is True
+
+def test_invoke_skill_with_streaming_flag(client):
+    with patch('api.skills.Path.exists', return_value=True):
+        response = client.post("/api/skills/invoke", json={
+            "project_id": "test-project",
+            "skill_name": "analyze-job-posting",
+            "prompt": "Analyze this job",
+            "stream": True
+        })
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "started"
+        assert data["streaming"] is True
+        assert data["project_id"] == "test-project"
