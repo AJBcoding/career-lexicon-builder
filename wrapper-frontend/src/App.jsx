@@ -1,19 +1,20 @@
-import { useState, useEffect } from 'react';
-import { healthCheck } from './services/api';
+import { useState } from 'react';
+import ProjectDashboard from './components/ProjectDashboard';
 
 function App() {
-  const [health, setHealth] = useState(null);
+  const [selectedProject, setSelectedProject] = useState(null);
 
-  useEffect(() => {
-    healthCheck().then(setHealth).catch(console.error);
-  }, []);
+  if (selectedProject) {
+    return (
+      <div>
+        <button onClick={() => setSelectedProject(null)}>← Back to Dashboard</button>
+        <h2>Project: {selectedProject.institution} - {selectedProject.position}</h2>
+        <p>Project workspace coming soon...</p>
+      </div>
+    );
+  }
 
-  return (
-    <div>
-      <h1>Career Lexicon Wrapper</h1>
-      <p>Backend Status: {health?.status || 'connecting...'}</p>
-    </div>
-  );
+  return <ProjectDashboard onSelectProject={setSelectedProject} />;
 }
 
 export default App;
