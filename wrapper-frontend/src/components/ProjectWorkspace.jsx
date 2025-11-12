@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import FileUpload from './FileUpload';
 import PreviewPanel from './PreviewPanel';
+import ChatInterface from './ChatInterface';
 import api from '../services/api';
 
 function ProjectWorkspace({ project, onBack }) {
@@ -11,6 +12,7 @@ function ProjectWorkspace({ project, onBack }) {
   const [streaming, setStreaming] = useState('');
   const [streamComplete, setStreamComplete] = useState(false);
   const [usage, setUsage] = useState(null);
+  const [viewMode, setViewMode] = useState('chat'); // 'chat' or 'tools'
   const wsRef = useRef(null);
   const streamingRef = useRef(null);
 
@@ -107,157 +109,212 @@ function ProjectWorkspace({ project, onBack }) {
   };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <button onClick={onBack} style={{ marginBottom: '20px' }}>
+    <div style={{ padding: '20px', height: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <button onClick={onBack} style={{ marginBottom: '20px', alignSelf: 'flex-start' }}>
         ← Back to Dashboard
       </button>
 
       <h2>{project.institution} - {project.position}</h2>
       <p>Status: {project.current_stage}</p>
 
-      <div style={{ marginTop: '30px' }}>
-        <h3>Upload Job Posting</h3>
-        <FileUpload
-          projectId={project.project_id}
-          onUploadComplete={() => alert('File uploaded successfully')}
-        />
-      </div>
-
-      <div style={{ marginTop: '30px' }}>
-        <h3>Actions</h3>
-
-        {/* API Mode Toggle */}
-        <div style={{ marginBottom: '10px' }}>
-          <label>
-            <input
-              type="checkbox"
-              checked={useAPI}
-              onChange={(e) => setUseAPI(e.target.checked)}
-            />
-            {' '}Use Anthropic API (faster, requires API key)
-          </label>
-        </div>
-
+      {/* View Mode Toggle */}
+      <div style={{
+        marginTop: '20px',
+        marginBottom: '20px',
+        display: 'flex',
+        gap: '10px',
+        borderBottom: '2px solid #e5e7eb',
+        paddingBottom: '10px'
+      }}>
         <button
-          onClick={handleAnalyzeJob}
-          disabled={processing}
-          style={{ padding: '10px 20px' }}
+          onClick={() => setViewMode('chat')}
+          style={{
+            padding: '10px 20px',
+            border: 'none',
+            borderBottom: viewMode === 'chat' ? '3px solid #3b82f6' : '3px solid transparent',
+            backgroundColor: 'transparent',
+            color: viewMode === 'chat' ? '#3b82f6' : '#6b7280',
+            fontWeight: viewMode === 'chat' ? '600' : '400',
+            cursor: 'pointer',
+            fontSize: '15px',
+            transition: 'all 0.2s'
+          }}
         >
-          {processing ? 'Analyzing...' : 'Analyze Job Posting'}
+          Chat
         </button>
-
-        {useAPI && (
-          <span style={{ marginLeft: '10px', color: '#666', fontSize: '14px' }}>
-            3-5x faster than CLI
-          </span>
-        )}
+        <button
+          onClick={() => setViewMode('tools')}
+          style={{
+            padding: '10px 20px',
+            border: 'none',
+            borderBottom: viewMode === 'tools' ? '3px solid #3b82f6' : '3px solid transparent',
+            backgroundColor: 'transparent',
+            color: viewMode === 'tools' ? '#3b82f6' : '#6b7280',
+            fontWeight: viewMode === 'tools' ? '600' : '400',
+            cursor: 'pointer',
+            fontSize: '15px',
+            transition: 'all 0.2s'
+          }}
+        >
+          Tools
+        </button>
       </div>
 
-      {/* Streaming Output */}
-      {streaming && (
-        <div style={{
-          marginTop: '30px',
-          padding: '15px',
-          backgroundColor: '#f5f5f5',
-          borderRadius: '5px',
-          maxHeight: '400px',
-          overflow: 'auto'
-        }}
-        ref={streamingRef}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-            <h3>
-              {streamComplete ? 'Analysis Complete' : 'Analyzing...'}
-              {processing && <span className="spinner"> ⏳</span>}
-            </h3>
-            {usage && (
-              <span style={{ fontSize: '12px', color: '#666' }}>
-                Tokens: {usage.input_tokens} in / {usage.output_tokens} out
+      {/* Chat View */}
+      {viewMode === 'chat' && (
+        <div style={{ flex: 1, minHeight: 0, border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden' }}>
+          <ChatInterface project={project} wsRef={wsRef} />
+        </div>
+      )}
+
+      {/* Tools View */}
+      {viewMode === 'tools' && (
+        <>
+          <div style={{ marginTop: '10px' }}>
+            <h3>Upload Job Posting</h3>
+            <FileUpload
+              projectId={project.project_id}
+              onUploadComplete={() => alert('File uploaded successfully')}
+            />
+          </div>
+
+          <div style={{ marginTop: '30px' }}>
+            <h3>Actions</h3>
+
+            {/* API Mode Toggle */}
+            <div style={{ marginBottom: '10px' }}>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={useAPI}
+                  onChange={(e) => setUseAPI(e.target.checked)}
+                />
+                {' '}Use Anthropic API (faster, requires API key)
+              </label>
+            </div>
+
+            <button
+              onClick={handleAnalyzeJob}
+              disabled={processing}
+              style={{ padding: '10px 20px' }}
+            >
+              {processing ? 'Analyzing...' : 'Analyze Job Posting'}
+            </button>
+
+            {useAPI && (
+              <span style={{ marginLeft: '10px', color: '#666', fontSize: '14px' }}>
+                3-5x faster than CLI
               </span>
             )}
           </div>
 
-          <div style={{
-            whiteSpace: 'pre-wrap',
-            fontFamily: 'monospace',
-            fontSize: '13px',
-            lineHeight: '1.5'
-          }}>
-            {streaming}
-          </div>
-        </div>
-      )}
+          {/* Streaming Output */}
+          {streaming && (
+            <div style={{
+              marginTop: '30px',
+              padding: '15px',
+              backgroundColor: '#f5f5f5',
+              borderRadius: '5px',
+              maxHeight: '400px',
+              overflow: 'auto'
+            }}
+            ref={streamingRef}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                <h3>
+                  {streamComplete ? 'Analysis Complete' : 'Analyzing...'}
+                  {processing && <span className="spinner"> ⏳</span>}
+                </h3>
+                {usage && (
+                  <span style={{ fontSize: '12px', color: '#666' }}>
+                    Tokens: {usage.input_tokens} in / {usage.output_tokens} out
+                  </span>
+                )}
+              </div>
 
-      {result && (
-        <div style={{ marginTop: '30px', padding: '15px', backgroundColor: '#f5f5f5' }}>
-          <h3>Result</h3>
-          <pre>{JSON.stringify(result, null, 2)}</pre>
-        </div>
-      )}
+              <div style={{
+                whiteSpace: 'pre-wrap',
+                fontFamily: 'monospace',
+                fontSize: '13px',
+                lineHeight: '1.5'
+              }}>
+                {streaming}
+              </div>
+            </div>
+          )}
 
-      <div style={{ marginTop: '30px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', height: '600px' }}>
-        <div>
-          <h3>Files</h3>
-          <div style={{ border: '1px solid #ddd', borderRadius: '5px', padding: '10px' }}>
-            <button
-              onClick={() => setSelectedFile('01-job-analysis.md')}
-              style={{
-                display: 'block',
-                width: '100%',
-                padding: '10px',
-                marginBottom: '5px',
-                textAlign: 'left',
-                background: selectedFile === '01-job-analysis.md' ? '#e3f2fd' : 'white',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}
-            >
-              01-job-analysis.md
-            </button>
-            <button
-              onClick={() => setSelectedFile('02-fit-analysis.md')}
-              style={{
-                display: 'block',
-                width: '100%',
-                padding: '10px',
-                marginBottom: '5px',
-                textAlign: 'left',
-                background: selectedFile === '02-fit-analysis.md' ? '#e3f2fd' : 'white',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}
-            >
-              02-fit-analysis.md
-            </button>
-            <button
-              onClick={() => setSelectedFile('03-cover-letter.md')}
-              style={{
-                display: 'block',
-                width: '100%',
-                padding: '10px',
-                textAlign: 'left',
-                background: selectedFile === '03-cover-letter.md' ? '#e3f2fd' : 'white',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}
-            >
-              03-cover-letter.md
-            </button>
+          {result && (
+            <div style={{ marginTop: '30px', padding: '15px', backgroundColor: '#f5f5f5' }}>
+              <h3>Result</h3>
+              <pre>{JSON.stringify(result, null, 2)}</pre>
+            </div>
+          )}
+
+          <div style={{ marginTop: '30px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', height: '600px' }}>
+            <div>
+              <h3>Files</h3>
+              <div style={{ border: '1px solid #ddd', borderRadius: '5px', padding: '10px' }}>
+                <button
+                  onClick={() => setSelectedFile('01-job-analysis.md')}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    padding: '10px',
+                    marginBottom: '5px',
+                    textAlign: 'left',
+                    background: selectedFile === '01-job-analysis.md' ? '#e3f2fd' : 'white',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  01-job-analysis.md
+                </button>
+                <button
+                  onClick={() => setSelectedFile('02-fit-analysis.md')}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    padding: '10px',
+                    marginBottom: '5px',
+                    textAlign: 'left',
+                    background: selectedFile === '02-fit-analysis.md' ? '#e3f2fd' : 'white',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  02-fit-analysis.md
+                </button>
+                <button
+                  onClick={() => setSelectedFile('03-cover-letter.md')}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    padding: '10px',
+                    textAlign: 'left',
+                    background: selectedFile === '03-cover-letter.md' ? '#e3f2fd' : 'white',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  03-cover-letter.md
+                </button>
+              </div>
+            </div>
+            <div>
+              <h3>Preview</h3>
+              <div style={{ border: '1px solid #ddd', borderRadius: '5px', height: '100%' }}>
+                <PreviewPanel
+                  projectId={project.project_id}
+                  filename={selectedFile}
+                  type="html"
+                />
+              </div>
+            </div>
           </div>
-        </div>
-        <div>
-          <h3>Preview</h3>
-          <div style={{ border: '1px solid #ddd', borderRadius: '5px', height: '100%' }}>
-            <PreviewPanel
-              projectId={project.project_id}
-              filename={selectedFile}
-              type="html"
-            />
-          </div>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 }
