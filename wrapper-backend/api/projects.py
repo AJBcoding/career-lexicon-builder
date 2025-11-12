@@ -4,6 +4,7 @@ from typing import List
 from pathlib import Path
 import os
 from services.project_service import ProjectService
+from services.project_watcher_manager import get_project_watcher_manager
 from models.project import ProjectState
 
 router = APIRouter(prefix="/api/projects", tags=["projects"])
@@ -39,3 +40,17 @@ async def create_project(
 @router.get("", response_model=List[ProjectState])
 async def list_projects(service: ProjectService = Depends(get_project_service)):
     return service.list_projects()
+
+@router.post("/{project_id}/watch")
+async def start_watching_project(project_id: str):
+    """Start watching project directory for file changes"""
+    manager = get_project_watcher_manager()
+    await manager.start_watching_project(project_id)
+    return {"status": "watching", "project_id": project_id}
+
+@router.delete("/{project_id}/watch")
+async def stop_watching_project(project_id: str):
+    """Stop watching project directory"""
+    manager = get_project_watcher_manager()
+    manager.stop_watching_project(project_id)
+    return {"status": "stopped", "project_id": project_id}

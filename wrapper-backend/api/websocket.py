@@ -55,7 +55,14 @@ manager = ConnectionManager()
 
 @router.websocket("/ws/{project_id}")
 async def websocket_endpoint(websocket: WebSocket, project_id: str):
+    from services.project_watcher_manager import get_project_watcher_manager
+
     await manager.connect(websocket, project_id)
+
+    # Start watching project when first client connects
+    watcher_manager = get_project_watcher_manager()
+    await watcher_manager.start_watching_project(project_id)
+
     try:
         while True:
             # Receive messages from client
@@ -77,8 +84,16 @@ async def websocket_endpoint(websocket: WebSocket, project_id: str):
 
     except WebSocketDisconnect:
         manager.disconnect(websocket, project_id)
+
+        # Stop watching if no more clients for this project
+        if project_id not in manager.active_connections or not manager.active_connections[project_id]:
+            watcher_manager.stop_watching_project(project_id)
     except Exception as e:
         manager.disconnect(websocket, project_id)
+
+        # Stop watching if no more clients for this project
+        if project_id not in manager.active_connections or not manager.active_connections[project_id]:
+            watcher_manager.stop_watching_project(project_id)
 
 # Export manager for use in other modules
 def get_connection_manager():

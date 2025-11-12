@@ -46,3 +46,38 @@ def test_list_projects_endpoint(client, temp_apps_dir):
     assert response.status_code == 200
     projects = response.json()
     assert len(projects) == 2
+
+def test_start_watching_project(client, temp_apps_dir):
+    # Create a project
+    create_response = client.post("/api/projects", json={
+        "institution": "UCLA",
+        "position": "Assistant Dean",
+        "date": "2024-11-15"
+    })
+    project_id = create_response.json()["project_id"]
+
+    # Start watching
+    response = client.post(f"/api/projects/{project_id}/watch")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "watching"
+    assert data["project_id"] == project_id
+
+def test_stop_watching_project(client, temp_apps_dir):
+    # Create a project
+    create_response = client.post("/api/projects", json={
+        "institution": "UCLA",
+        "position": "Assistant Dean",
+        "date": "2024-11-15"
+    })
+    project_id = create_response.json()["project_id"]
+
+    # Start watching
+    client.post(f"/api/projects/{project_id}/watch")
+
+    # Stop watching
+    response = client.delete(f"/api/projects/{project_id}/watch")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "stopped"
+    assert data["project_id"] == project_id
