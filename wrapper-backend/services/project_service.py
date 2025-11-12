@@ -1,15 +1,18 @@
 from pathlib import Path
 import json
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 from models.project import ProjectState
+from models.db_models import Project
+from sqlalchemy.orm import Session
 
 class ProjectService:
-    def __init__(self, applications_dir: Path):
+    def __init__(self, applications_dir: Path, db: Optional[Session] = None):
         self.applications_dir = Path(applications_dir)
         self.applications_dir.mkdir(parents=True, exist_ok=True)
+        self.db = db
 
-    def create_project(self, institution: str, position: str, date: str) -> str:
+    def create_project(self, institution: str, position: str, date: str, owner_id: Optional[int] = None) -> str:
         # Generate project ID
         project_id = f"{institution.lower().replace(' ', '-')}-{position.lower().replace(' ', '-')}-{date}"
         project_path = self.applications_dir / project_id
@@ -28,14 +31,54 @@ class ProjectService:
         state_file = project_path / ".project-state.json"
         state_file.write_text(state.model_dump_json(indent=2))
 
+        # Store in database if db session provided
+        if self.db and owner_id is not None:
+            db_project = Project(
+                project_id=project_id,
+                institution=institution,
+                position=position,
+                current_stage="created",
+                owner_id=owner_id
+            )
+            self.db.add(db_project)
+            self.db.commit()
+            self.db.refresh(db_project)
+
         return project_id
 
-    def list_projects(self) -> List[ProjectState]:
+    def list_projects(self, owner_id: Optional[int] = None) -> List[ProjectState]:
         projects = []
-        for project_dir in self.applications_dir.iterdir():
-            if project_dir.is_dir():
-                state_file = project_dir / ".project-state.json"
-                if state_file.exists():
-                    state_data = json.loads(state_file.read_text())
-                    projects.append(ProjectState(**state_data))
+
+        # If owner_id provided and db available, filter by ownership
+        if owner_id is not None and self.db:
+            db_projects = self.db.query(Project).filter(Project.owner_id == owner_id).all()
+            project_ids = {p.project_id for p in db_projects}
+
+            for project_dir in self.applications_dir.iterdir():
+                if project_dir.is_dir() and project_dir.name in project_ids:
+                    state_file = project_dir / ".project-state.json"
+                    if state_file.exists():
+                        state_data = json.loads(state_file.read_text())
+                        projects.append(ProjectState(**state_data))
+        else:
+            # No filtering - list all projects
+            for project_dir in self.applications_dir.iterdir():
+                if project_dir.is_dir():
+                    state_file = project_dir / ".project-state.json"
+                    if state_file.exists():
+                        state_data = json.loads(state_file.read_text())
+                        projects.append(ProjectState(**state_data))
+
         return sorted(projects, key=lambda p: p.updated_at, reverse=True)
+
+    def get_project(self, project_id: str, owner_id: Optional[int] = None) -> Optional[Project]:
+        """Get project from database with optional ownership verification"""
+        if not self.db:
+            return None
+
+        query = self.db.query(Project).filter(Project.project_id == project_id)
+
+        if owner_id is not None:
+            query = query.filter(Project.owner_id == owner_id)
+
+        return query.first()

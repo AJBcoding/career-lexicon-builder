@@ -1,16 +1,25 @@
-from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
+from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks, status
 from pydantic import BaseModel
 from pathlib import Path
 import os
+from sqlalchemy.orm import Session
 from services.skill_service import SkillService
 from services.anthropic_service import AnthropicService
+from services.project_service import ProjectService
 from api.websocket import get_connection_manager
+from models.db_models import User
+from utils.auth import get_current_user
+from database import get_db
 
 router = APIRouter(prefix="/api/skills", tags=["skills"])
 
 def get_skill_service():
     claude_path = os.getenv("CLAUDE_CODE_PATH", "claude")
     return SkillService(claude_path)
+
+def get_project_service(db: Session = Depends(get_db)):
+    apps_dir = os.getenv("APPLICATIONS_DIR", "./applications")
+    return ProjectService(Path(apps_dir), db=db)
 
 class InvokeSkillRequest(BaseModel):
     project_id: str
@@ -23,8 +32,25 @@ class InvokeSkillRequest(BaseModel):
 async def invoke_skill(
     request: InvokeSkillRequest,
     background_tasks: BackgroundTasks,
-    service: SkillService = Depends(get_skill_service)
+    current_user: User = Depends(get_current_user),
+    service: SkillService = Depends(get_skill_service),
+    project_service: ProjectService = Depends(get_project_service)
 ):
+    # Verify project exists and user owns it
+    project = project_service.get_project(request.project_id, owner_id=current_user.id)
+    if not project:
+        # Check if project exists at all
+        project_exists = project_service.get_project(request.project_id)
+        if project_exists:
+            # Project exists but user doesn't own it
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You are not authorized to access this project"
+            )
+        else:
+            # Project doesn't exist
+            raise HTTPException(status_code=404, detail="Project not found")
+
     apps_dir = Path(os.getenv("APPLICATIONS_DIR", "./applications"))
     project_path = apps_dir / request.project_id
 

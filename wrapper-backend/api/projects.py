@@ -3,15 +3,19 @@ from pydantic import BaseModel
 from typing import List
 from pathlib import Path
 import os
+from sqlalchemy.orm import Session
 from services.project_service import ProjectService
 from services.project_watcher_manager import get_project_watcher_manager
 from models.project import ProjectState
+from models.db_models import User
+from utils.auth import get_current_user
+from database import get_db
 
 router = APIRouter(prefix="/api/projects", tags=["projects"])
 
-def get_project_service():
+def get_project_service(db: Session = Depends(get_db)):
     apps_dir = os.getenv("APPLICATIONS_DIR", "./applications")
-    return ProjectService(Path(apps_dir))
+    return ProjectService(Path(apps_dir), db=db)
 
 class CreateProjectRequest(BaseModel):
     institution: str
@@ -21,12 +25,14 @@ class CreateProjectRequest(BaseModel):
 @router.post("", response_model=ProjectState)
 async def create_project(
     request: CreateProjectRequest,
+    current_user: User = Depends(get_current_user),
     service: ProjectService = Depends(get_project_service)
 ):
     project_id = service.create_project(
         institution=request.institution,
         position=request.position,
-        date=request.date
+        date=request.date,
+        owner_id=current_user.id
     )
 
     # Get the created project state
@@ -38,8 +44,11 @@ async def create_project(
     return ProjectState(**state_data)
 
 @router.get("", response_model=List[ProjectState])
-async def list_projects(service: ProjectService = Depends(get_project_service)):
-    return service.list_projects()
+async def list_projects(
+    current_user: User = Depends(get_current_user),
+    service: ProjectService = Depends(get_project_service)
+):
+    return service.list_projects(owner_id=current_user.id)
 
 @router.post("/{project_id}/watch")
 async def start_watching_project(project_id: str):
