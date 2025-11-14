@@ -97,3 +97,9 @@ applications/
 nginx/ssl/*.pem
 nginx/ssl/*.key
 .env.production
+
+# Claude Code configuration
+.claude/
+
+# Database files
+*.db
