@@ -98,8 +98,9 @@ nginx/ssl/*.pem
 nginx/ssl/*.key
 .env.production
 
-# Claude Code configuration
-.claude/
+# Claude Code configuration (ignore all except Skills directory)
+.claude/*
+!.claude/Skills/
 
 # Database files
 *.db
