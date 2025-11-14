@@ -12,47 +12,172 @@ Coverage gaps to address:
 """
 
 import pytest
-from generators.hierarchical_generator import (
-    # TODO: Import actual functions/classes from hierarchical_generator
-    # generate_lexicon,
-    # format_section,
-    # add_citation,
-    # etc.
-)
+import tempfile
+import os
+from pathlib import Path
+from generators.hierarchical_generator import HierarchicalMarkdownGenerator
 
 
 class TestHierarchicalGeneration:
     """Tests for main hierarchical generation functions."""
 
-    @pytest.mark.skip("TODO: Implement - test basic lexicon generation")
-    def test_generate_lexicon_basic(self):
+    def test_generator_initialization(self):
         """
-        Test basic lexicon generation from analyzed data.
+        Test HierarchicalMarkdownGenerator initialization.
 
-        Coverage gap: Core generation logic
-        Priority: CRITICAL - Core output functionality
+        Coverage gap: Initialization logic
+        Priority: CRITICAL - Basic setup
         """
-        pass
+        generator = HierarchicalMarkdownGenerator()
+        assert generator is not None
+        assert hasattr(generator, 'generated_date')
+        assert generator.generated_date is not None
 
-    @pytest.mark.skip("TODO: Implement - test hierarchical structure")
-    def test_hierarchical_structure_creation(self):
+    def test_generate_philosophy_with_empty_data(self):
         """
-        Test creation of hierarchical section structures.
+        Test philosophy lexicon generation with empty data.
 
-        Coverage gap: Section hierarchy logic
-        Priority: HIGH - Structure organization
-        """
-        pass
-
-    @pytest.mark.skip("TODO: Implement - test empty data handling")
-    def test_generate_lexicon_empty_data(self):
-        """
-        Test lexicon generation with empty/no data.
-
-        Coverage gap: Edge case handling
+        Coverage gap: Empty data handling
         Priority: MEDIUM - Error handling
         """
-        pass
+        generator = HierarchicalMarkdownGenerator()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = os.path.join(tmpdir, 'philosophy.md')
+
+            # Empty data dict
+            result = generator.generate_philosophy({}, output_path)
+
+            assert result == output_path
+            assert os.path.exists(output_path)
+
+            # Verify file has basic structure
+            with open(output_path, 'r') as f:
+                content = f.read()
+                assert '# Career Philosophy & Values' in content
+                assert 'Generated' in content
+
+    def test_generate_philosophy_with_markdown_fallback(self):
+        """
+        Test philosophy generation with raw markdown (JSON parsing fallback).
+
+        Coverage gap: Markdown fallback handling
+        Priority: HIGH - Error recovery
+        """
+        generator = HierarchicalMarkdownGenerator()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = os.path.join(tmpdir, 'philosophy.md')
+
+            # Data with markdown key (JSON parsing failed scenario)
+            data = {
+                'markdown': '# Test Philosophy\n\nThis is fallback markdown content.'
+            }
+
+            result = generator.generate_philosophy(data, output_path)
+
+            assert result == output_path
+            assert os.path.exists(output_path)
+
+            with open(output_path, 'r') as f:
+                content = f.read()
+                assert '# Test Philosophy' in content
+                assert 'fallback markdown content' in content
+
+    def test_generate_philosophy_with_structured_data(self):
+        """
+        Test philosophy generation with structured data.
+
+        Coverage gap: Structured data processing
+        Priority: CRITICAL - Core functionality
+        """
+        generator = HierarchicalMarkdownGenerator()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = os.path.join(tmpdir, 'philosophy.md')
+
+            # Structured data
+            data = {
+                'leadership_approaches': [
+                    {
+                        'name': 'Collaborative Leadership',
+                        'core_principle': 'Team empowerment through collaboration',
+                        'description': 'Focus on building consensus and shared ownership.',
+                        'evidence': [
+                            {
+                                'quote': 'Led team of 10 engineers',
+                                'context': 'At TechCorp',
+                                'source': 'Resume 2024'
+                            }
+                        ]
+                    }
+                ],
+                'core_values': [
+                    {
+                        'name': 'Innovation',
+                        'description': 'Driving change through creative solutions'
+                    }
+                ],
+                'problem_solving_philosophy': [
+                    {
+                        'name': 'Data-Driven Decisions',
+                        'approach': 'Use metrics to guide choices'
+                    }
+                ]
+            }
+
+            result = generator.generate_philosophy(data, output_path)
+
+            assert result == output_path
+            assert os.path.exists(output_path)
+
+            with open(output_path, 'r') as f:
+                content = f.read()
+                # Check structure
+                assert '# Career Philosophy & Values' in content
+                assert '## I. Leadership Approaches' in content
+                assert '## II. Core Values' in content
+                assert '## III. Problem-Solving Philosophy' in content
+                # Check content
+                assert 'Collaborative Leadership' in content
+                assert 'Innovation' in content
+                assert 'Data-Driven Decisions' in content
+
+    def test_generate_all_lexicons(self):
+        """
+        Test generating all four lexicon files at once.
+
+        Coverage gap: Complete workflow
+        Priority: CRITICAL - Main entry point
+        """
+        generator = HierarchicalMarkdownGenerator()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            analysis_results = {
+                'philosophy': {},
+                'achievements': {},
+                'narratives': {},
+                'language_bank': {}
+            }
+
+            files = generator.generate_all(analysis_results, tmpdir)
+
+            assert 'philosophy' in files
+            assert 'achievements' in files
+            assert 'narratives' in files
+            assert 'language' in files
+
+            # Verify all files were created
+            assert os.path.exists(files['philosophy'])
+            assert os.path.exists(files['achievements'])
+            assert os.path.exists(files['narratives'])
+            assert os.path.exists(files['language'])
+
+            # Verify filenames
+            assert '01_career_philosophy.md' in files['philosophy']
+            assert '02_achievement_library.md' in files['achievements']
+            assert '03_narrative_patterns.md' in files['narratives']
+            assert '04_language_bank.md' in files['language']
 
 
 class TestMarkdownFormatting:

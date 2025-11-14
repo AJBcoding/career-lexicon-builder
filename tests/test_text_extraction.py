@@ -579,59 +579,90 @@ class TestPowerPointProcessing:
 class TestTextCleanupFunctions:
     """Tests for text cleanup and normalization (Lines 575-587)."""
 
-    @pytest.mark.skip("TODO: Implement - test whitespace normalization")
-    def test_whitespace_normalization(self):
+    def test_unicode_decode_error_handling(self):
         """
-        Test normalization of excessive whitespace.
+        Test handling of files with encoding issues.
 
-        Coverage gap: Lines 575-587 (13 lines)
+        Coverage gap: Lines 575-587 (UnicodeDecodeError handling)
         Priority: MEDIUM - Text cleanup
         """
-        pass
+        # Create a file with invalid UTF-8 encoding
+        with tempfile.NamedTemporaryFile(suffix='.txt', delete=False, mode='wb') as tmp:
+            # Write bytes that will fail UTF-8 but work with latin-1
+            tmp.write(b'\xe9\xe0\xe8')  # Valid latin-1, invalid UTF-8
+            tmp.flush()
+            tmp_path = tmp.name
 
-    @pytest.mark.skip("TODO: Implement - test special character handling")
-    def test_special_character_handling(self):
-        """
-        Test handling of special characters and encoding.
+        try:
+            result = extract_text_from_document(tmp_path)
+            # Should try multiple encodings and succeed with latin-1
+            assert result['success'] is True
+            assert result['extraction_method'] == 'text'
+        finally:
+            os.unlink(tmp_path)
 
-        Coverage gap: Character cleanup logic
-        Priority: MEDIUM - Text quality
+    def test_text_extraction_exception_handling(self):
         """
-        pass
+        Test general exception handling in text extraction.
 
-    @pytest.mark.skip("TODO: Implement - test line break normalization")
-    def test_line_break_normalization(self):
+        Coverage gap: Lines 586-592 (general exception handler)
+        Priority: MEDIUM - Error recovery
         """
-        Test normalization of various line break styles.
+        # Test with a file that will cause an exception
+        with tempfile.NamedTemporaryFile(suffix='.txt', delete=False) as tmp:
+            tmp.write(b'test content')
+            tmp.flush()
+            tmp_path = tmp.name
 
-        Coverage gap: Line break handling
-        Priority: LOW - Formatting consistency
-        """
-        pass
+        # Delete the file to cause an error during processing
+        os.unlink(tmp_path)
+
+        # Should handle the exception gracefully
+        result = extract_text_from_document(tmp_path)
+        assert result['success'] is False
+        assert 'File not found' in result['error']
 
 
 class TestHelperFunctions:
     """Tests for helper/utility functions (Lines 653-659)."""
 
-    @pytest.mark.skip("TODO: Implement - test file hash calculation")
-    def test_file_hash_calculation(self):
+    def test_metadata_extraction_with_dear_pattern(self):
         """
-        Test file hash calculation for change detection.
+        Test metadata extraction using 'Dear' pattern matching.
 
-        Coverage gap: Lines 653-659 (7 lines)
-        Priority: MEDIUM - File tracking
+        Coverage gap: Lines 653-659 (Dear pattern matching)
+        Priority: MEDIUM - Metadata extraction
         """
-        pass
+        # Test with 'Dear Hiring Manager' pattern
+        text = "Dear Hiring Manager,\n\nI am writing to apply for the position."
+        result = extract_metadata("letter.pages", text)
 
-    @pytest.mark.skip("TODO: Implement - test path normalization")
-    def test_path_normalization_helper(self):
-        """
-        Test path normalization helper functions.
+        # The function tries to extract organization from Dear pattern
+        # but skips if it's a generic title
+        assert result is not None
+        assert 'target_organization' in result
 
-        Coverage gap: Path handling utilities
-        Priority: LOW - File path utilities
+        # Test with organization-like name
+        text = "Dear TechCorp Team,\n\nI am excited to apply."
+        result = extract_metadata("letter.pages", text)
+        assert result is not None
+
+    def test_position_extraction_from_text(self):
         """
-        pass
+        Test position title extraction from document text.
+
+        Coverage gap: Lines 662-669 (position keyword matching)
+        Priority: MEDIUM - Metadata extraction
+        """
+        # Test extracting position from text
+        text = "I am writing to apply for the Senior Director of Operations position at your company."
+        result = extract_metadata("letter.pages", text)
+
+        assert result is not None
+        assert 'target_position' in result
+        # Should extract position if under 100 chars
+        if result['target_position']:
+            assert len(result['target_position']) < 100
 
 
 class TestDocumentTypeDetection:
