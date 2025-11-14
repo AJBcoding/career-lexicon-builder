@@ -180,6 +180,132 @@ class TestHierarchicalGeneration:
             assert '04_language_bank.md' in files['language']
 
 
+class TestAchievementsGeneration:
+    """Tests for achievements lexicon generation."""
+
+    def test_generate_achievements_with_empty_data(self):
+        """Test achievements generation with empty data."""
+        generator = HierarchicalMarkdownGenerator()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = os.path.join(tmpdir, 'achievements.md')
+            result = generator.generate_achievements({}, output_path)
+
+            assert result == output_path
+            assert os.path.exists(output_path)
+
+            with open(output_path, 'r') as f:
+                content = f.read()
+                assert '# Achievement Library' in content
+                assert 'Generated' in content
+
+    def test_generate_achievements_with_markdown_fallback(self):
+        """Test achievements generation with markdown fallback."""
+        generator = HierarchicalMarkdownGenerator()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = os.path.join(tmpdir, 'achievements.md')
+            data = {'markdown': '# Test Achievements\n\nAchievement list here.'}
+
+            result = generator.generate_achievements(data, output_path)
+            assert result == output_path
+
+            with open(output_path, 'r') as f:
+                content = f.read()
+                assert '# Test Achievements' in content
+
+    def test_generate_achievements_with_structured_data(self):
+        """Test achievements generation with structured data."""
+        generator = HierarchicalMarkdownGenerator()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = os.path.join(tmpdir, 'achievements.md')
+            data = {
+                'categories': [
+                    {
+                        'name': 'Leadership',
+                        'achievements': [
+                            {
+                                'title': 'Team Management',
+                                'impact': 'Improved team productivity by 30%',
+                                'evidence': [{'quote': 'Led team of 10', 'source': 'Resume'}]
+                            }
+                        ]
+                    }
+                ]
+            }
+
+            result = generator.generate_achievements(data, output_path)
+            assert result == output_path
+
+            with open(output_path, 'r') as f:
+                content = f.read()
+                assert '# Achievement Library' in content
+                assert 'Leadership' in content
+
+
+class TestNarrativesGeneration:
+    """Tests for narratives lexicon generation."""
+
+    def test_generate_narratives_with_empty_data(self):
+        """Test narratives generation with empty data."""
+        generator = HierarchicalMarkdownGenerator()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = os.path.join(tmpdir, 'narratives.md')
+            result = generator.generate_narratives({}, output_path)
+
+            assert result == output_path
+            assert os.path.exists(output_path)
+
+            with open(output_path, 'r') as f:
+                content = f.read()
+                assert '# Narrative Patterns' in content
+                assert 'Generated' in content
+
+    def test_generate_narratives_with_markdown_fallback(self):
+        """Test narratives generation with markdown fallback."""
+        generator = HierarchicalMarkdownGenerator()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = os.path.join(tmpdir, 'narratives.md')
+            data = {'markdown': '# Test Narratives\n\nNarrative patterns here.'}
+
+            result = generator.generate_narratives(data, output_path)
+            assert result == output_path
+
+            with open(output_path, 'r') as f:
+                content = f.read()
+                assert '# Test Narratives' in content
+
+    def test_generate_narratives_with_structured_data(self):
+        """Test narratives generation with structured data."""
+        generator = HierarchicalMarkdownGenerator()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = os.path.join(tmpdir, 'narratives.md')
+            data = {
+                'cover_letter_architecture': [
+                    {
+                        'pattern_name': 'Opening Hook',
+                        'description': 'Start with compelling hook',
+                        'examples': [
+                            {'text': 'Example 1', 'source': 'Cover Letter 2024'}
+                        ]
+                    }
+                ]
+            }
+
+            result = generator.generate_narratives(data, output_path)
+            assert result == output_path
+
+            with open(output_path, 'r') as f:
+                content = f.read()
+                assert '# Narrative Patterns' in content
+                assert 'Cover Letter Architecture' in content
+                assert 'Opening Hook' in content
+
+
 class TestMarkdownFormatting:
     """Tests for markdown output formatting."""
 
