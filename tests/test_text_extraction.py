@@ -468,3 +468,215 @@ class TestIntegration:
                     os.unlink(test_path)
                 elif os.path.exists(tmp_path):
                     os.unlink(tmp_path)
+
+
+# ============================================================================
+# COVERAGE GAP STUBS - To be implemented
+# ============================================================================
+
+class TestPagesDocumentProcessing:
+    """Tests for .pages document-specific processing (Lines 301-366)."""
+
+    @pytest.mark.skip("TODO: Implement - test Pages XML structure parsing")
+    def test_pages_xml_structure_parsing(self):
+        """
+        Test parsing of Pages-specific XML structure.
+
+        Coverage gap: Lines 301-366 (66 lines)
+        Priority: HIGH - Pages format handling
+        """
+        pass
+
+    @pytest.mark.skip("TODO: Implement - test Pages formatting preservation")
+    def test_pages_formatting_preservation(self):
+        """
+        Test preservation of formatting from Pages documents.
+
+        Coverage gap: Pages-specific formatting extraction
+        Priority: MEDIUM - Formatting details
+        """
+        pass
+
+    @pytest.mark.skip("TODO: Implement - test Pages nested elements")
+    def test_pages_nested_elements_handling(self):
+        """
+        Test handling of nested elements in Pages XML.
+
+        Coverage gap: Complex XML structure handling
+        Priority: MEDIUM - Nested content
+        """
+        pass
+
+
+class TestKeynoteDocumentProcessing:
+    """Tests for .keynote document processing (Lines 384-440)."""
+
+    @pytest.mark.skip("TODO: Implement - test Keynote extraction basic")
+    def test_keynote_extraction_basic(self):
+        """
+        Test basic text extraction from Keynote files.
+
+        Coverage gap: Lines 384-440 (57 lines)
+        Priority: MEDIUM - Keynote support
+        """
+        pass
+
+    @pytest.mark.skip("TODO: Implement - test Keynote slide separation")
+    def test_keynote_slide_separation(self):
+        """
+        Test that Keynote slides are properly separated in output.
+
+        Coverage gap: Keynote slide handling
+        Priority: MEDIUM - Presentation structure
+        """
+        pass
+
+    @pytest.mark.skip("TODO: Implement - test Keynote notes extraction")
+    def test_keynote_notes_extraction(self):
+        """
+        Test extraction of speaker notes from Keynote.
+
+        Coverage gap: Keynote notes handling
+        Priority: LOW - Additional content
+        """
+        pass
+
+
+class TestPowerPointProcessing:
+    """Tests for PowerPoint document processing (Lines 458-531)."""
+
+    @pytest.mark.skip("TODO: Implement - test PowerPoint extraction basic")
+    def test_powerpoint_extraction_basic(self):
+        """
+        Test basic text extraction from PowerPoint files.
+
+        Coverage gap: Lines 458-531 (74 lines)
+        Priority: MEDIUM - PowerPoint support
+        """
+        pass
+
+    @pytest.mark.skip("TODO: Implement - test PowerPoint slide order")
+    def test_powerpoint_slide_order_preservation(self):
+        """
+        Test that PowerPoint slides maintain correct order.
+
+        Coverage gap: PowerPoint slide ordering
+        Priority: MEDIUM - Content organization
+        """
+        pass
+
+    @pytest.mark.skip("TODO: Implement - test PowerPoint tables")
+    def test_powerpoint_table_extraction(self):
+        """
+        Test extraction of tables from PowerPoint slides.
+
+        Coverage gap: PowerPoint table handling
+        Priority: LOW - Structured content
+        """
+        pass
+
+
+class TestTextCleanupFunctions:
+    """Tests for text cleanup and normalization (Lines 575-587)."""
+
+    @pytest.mark.skip("TODO: Implement - test whitespace normalization")
+    def test_whitespace_normalization(self):
+        """
+        Test normalization of excessive whitespace.
+
+        Coverage gap: Lines 575-587 (13 lines)
+        Priority: MEDIUM - Text cleanup
+        """
+        pass
+
+    @pytest.mark.skip("TODO: Implement - test special character handling")
+    def test_special_character_handling(self):
+        """
+        Test handling of special characters and encoding.
+
+        Coverage gap: Character cleanup logic
+        Priority: MEDIUM - Text quality
+        """
+        pass
+
+    @pytest.mark.skip("TODO: Implement - test line break normalization")
+    def test_line_break_normalization(self):
+        """
+        Test normalization of various line break styles.
+
+        Coverage gap: Line break handling
+        Priority: LOW - Formatting consistency
+        """
+        pass
+
+
+class TestHelperFunctions:
+    """Tests for helper/utility functions (Lines 653-659)."""
+
+    @pytest.mark.skip("TODO: Implement - test file hash calculation")
+    def test_file_hash_calculation(self):
+        """
+        Test file hash calculation for change detection.
+
+        Coverage gap: Lines 653-659 (7 lines)
+        Priority: MEDIUM - File tracking
+        """
+        pass
+
+    @pytest.mark.skip("TODO: Implement - test path normalization")
+    def test_path_normalization_helper(self):
+        """
+        Test path normalization helper functions.
+
+        Coverage gap: Path handling utilities
+        Priority: LOW - File path utilities
+        """
+        pass
+
+
+class TestDocumentTypeDetection:
+    """Tests for document type detection logic (Lines 269-270)."""
+
+    @pytest.mark.skip("TODO: Implement - test type detection from content")
+    def test_document_type_detection_from_content(self):
+        """
+        Test automatic detection of document type from content.
+
+        Coverage gap: Lines 269-270
+        Priority: MEDIUM - Type classification
+        """
+        pass
+
+    @pytest.mark.skip("TODO: Implement - test type detection edge cases")
+    def test_document_type_detection_edge_cases(self):
+        """
+        Test type detection with ambiguous content.
+
+        Coverage gap: Type detection edge cases
+        Priority: LOW - Edge case handling
+        """
+        pass
+
+
+class TestErrorHandlingPaths:
+    """Tests for error handling code paths (Line 170)."""
+
+    @pytest.mark.skip("TODO: Implement - test extraction error recovery")
+    def test_extraction_error_recovery(self):
+        """
+        Test recovery from extraction errors.
+
+        Coverage gap: Line 170
+        Priority: HIGH - Error handling
+        """
+        pass
+
+    @pytest.mark.skip("TODO: Implement - test partial extraction success")
+    def test_partial_extraction_success(self):
+        """
+        Test handling of partially successful extractions.
+
+        Coverage gap: Partial success scenarios
+        Priority: MEDIUM - Error recovery
+        """
+        pass

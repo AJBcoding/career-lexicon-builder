@@ -179,3 +179,51 @@ class TestCompareDates:
             None
         ]
         assert sorted_dates == expected
+
+
+# ============================================================================
+# COVERAGE GAP STUBS - To be implemented
+# ============================================================================
+
+class TestDateParserEdgeCases:
+    """Tests for date parser edge cases (Lines 81-82, 93-94)."""
+
+    @pytest.mark.skip("TODO: Implement - test malformed date strings")
+    def test_malformed_date_string_handling(self):
+        """
+        Test handling of malformed date strings.
+
+        Coverage gap: Lines 81-82
+        Priority: MEDIUM - Error handling
+        """
+        pass
+
+    @pytest.mark.skip("TODO: Implement - test boundary year values")
+    def test_boundary_year_values(self):
+        """
+        Test year values at boundaries of valid range.
+
+        Coverage gap: Lines 93-94
+        Priority: LOW - Edge case validation
+        """
+        pass
+
+    @pytest.mark.skip("TODO: Implement - test leap year dates")
+    def test_leap_year_date_parsing(self):
+        """
+        Test parsing of leap year dates (Feb 29).
+
+        Coverage gap: Leap year handling
+        Priority: LOW - Special date handling
+        """
+        pass
+
+    @pytest.mark.skip("TODO: Implement - test timezone considerations")
+    def test_timezone_aware_dates(self):
+        """
+        Test date parsing with timezone information if applicable.
+
+        Coverage gap: Timezone handling
+        Priority: LOW - Extended functionality
+        """
+        pass
