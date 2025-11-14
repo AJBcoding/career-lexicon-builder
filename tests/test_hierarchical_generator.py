@@ -306,6 +306,132 @@ class TestNarrativesGeneration:
                 assert 'Opening Hook' in content
 
 
+class TestLanguageBankGeneration:
+    """Tests for language bank lexicon generation."""
+
+    def test_generate_language_bank_with_empty_data(self):
+        """Test language bank generation with empty data."""
+        generator = HierarchicalMarkdownGenerator()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = os.path.join(tmpdir, 'language_bank.md')
+            result = generator.generate_language_bank({}, output_path)
+
+            assert result == output_path
+            assert os.path.exists(output_path)
+
+            with open(output_path, 'r') as f:
+                content = f.read()
+                assert '# Language Bank' in content
+                assert 'Generated' in content
+
+    def test_generate_language_bank_with_markdown_fallback(self):
+        """Test language bank generation with markdown fallback."""
+        generator = HierarchicalMarkdownGenerator()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = os.path.join(tmpdir, 'language_bank.md')
+            data = {'markdown': '# Test Language Bank\n\nPhrases here.'}
+
+            result = generator.generate_language_bank(data, output_path)
+            assert result == output_path
+
+            with open(output_path, 'r') as f:
+                content = f.read()
+                assert '# Test Language Bank' in content
+
+    def test_generate_language_bank_with_structured_data(self):
+        """Test language bank generation with structured data."""
+        generator = HierarchicalMarkdownGenerator()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = os.path.join(tmpdir, 'language_bank.md')
+            data = {
+                'action_verbs': [
+                    {
+                        'category': 'Leadership',
+                        'verbs': [
+                            {'verb': 'Led', 'usage': 'Past tense'},
+                            {'verb': 'Managed', 'usage': 'Past tense'}
+                        ]
+                    }
+                ],
+                'impact_phrases': [
+                    {
+                        'category': 'Quantitative Impact',
+                        'phrases': [
+                            {'pattern': 'Increased X by Y%', 'type': 'Percentage growth'},
+                            {'pattern': 'Reduced costs by $X', 'type': 'Cost savings'}
+                        ]
+                    }
+                ]
+            }
+
+            result = generator.generate_language_bank(data, output_path)
+            assert result == output_path
+
+            with open(output_path, 'r') as f:
+                content = f.read()
+                assert '# Language Bank' in content
+                assert 'Action Verbs' in content or 'Impact Phrases' in content
+
+
+class TestHelperMethods:
+    """Tests for helper formatting methods."""
+
+    def test_to_anchor_method(self):
+        """Test _to_anchor helper method for TOC links."""
+        generator = HierarchicalMarkdownGenerator()
+
+        # Test anchor generation
+        anchor = generator._to_anchor('Test Section Name')
+        assert anchor == 'test-section-name'
+
+        anchor = generator._to_anchor('Section With Numbers 123')
+        assert 'section-with-numbers' in anchor.lower()
+
+    def test_format_philosophy_item_with_evidence(self):
+        """Test _format_philosophy_item with evidence."""
+        generator = HierarchicalMarkdownGenerator()
+
+        item = {
+            'name': 'Test Philosophy',
+            'core_principle': 'Test principle',
+            'evidence': [
+                {
+                    'quote': 'Test quote',
+                    'context': 'Test context',
+                    'source': 'Test source'
+                }
+            ]
+        }
+
+        lines = generator._format_philosophy_item(item, '### A.', 3)
+        result = '\n'.join(lines)
+
+        assert 'Test Philosophy' in result
+        assert 'Test principle' in result
+        assert 'Test quote' in result
+        assert 'Test source' in result
+
+    def test_format_value_item(self):
+        """Test _format_value_item helper method."""
+        generator = HierarchicalMarkdownGenerator()
+
+        item = {
+            'name': 'Innovation',
+            'definition': 'Creating novel solutions',
+            'keywords': ['creative', 'novel', 'breakthrough']
+        }
+
+        lines = generator._format_value_item(item, '### A.', 3)
+        result = '\n'.join(lines)
+
+        assert 'Innovation' in result
+        assert 'Creating novel solutions' in result
+        assert 'creative' in result
+
+
 class TestMarkdownFormatting:
     """Tests for markdown output formatting."""
 
