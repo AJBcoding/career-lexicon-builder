@@ -250,6 +250,7 @@ See [PHASES.md](PHASES.md) for the complete story of how this project evolved fr
 - **[SECURITY.md](SECURITY.md)** - Security considerations
 
 ### Technical Documentation
+- **[docs/TESTING.md](docs/TESTING.md)** - Comprehensive testing guide (81% coverage)
 - **[HANDOFF.md](HANDOFF.md)** - Development handoff guide
 - **[PHASES.md](PHASES.md)** - Project evolution history
 - **[docs/LOGGING.md](docs/LOGGING.md)** - Logging architecture
@@ -264,6 +265,31 @@ See [PHASES.md](PHASES.md) for the complete story of how this project evolved fr
 
 ## 🧪 Testing
 
+**Current Test Coverage: 81%** (194 passing tests) ✅
+
+See **[docs/TESTING.md](docs/TESTING.md)** for comprehensive testing guide, patterns, and best practices.
+
+### Core System Tests
+```bash
+# Run all core system tests (194 tests, 81% coverage)
+PYTHONPATH=. pytest tests/ -v --ignore=tests/wrapper-backend
+
+# Generate coverage report
+PYTHONPATH=. coverage run -m pytest tests/ --ignore=tests/wrapper-backend
+coverage report --include="core/*,utils/*,generators/*"
+
+# Run specific test files
+PYTHONPATH=. pytest tests/test_core_orchestrator.py -v      # 100% coverage
+PYTHONPATH=. pytest tests/test_confidence_scorer.py -v      # 100% coverage
+PYTHONPATH=. pytest tests/test_core_state_manager.py -v     # 96% coverage
+PYTHONPATH=. pytest tests/test_document_processor.py -v     # 96% coverage
+```
+
+**Coverage by Module:**
+- **Core Systems** (97% coverage): orchestrator, state_manager, document_processor, confidence_scorer
+- **Utilities** (85% coverage): date_parser, text_extraction
+- **Generators** (75% coverage): hierarchical_generator
+
 ### Lexicon Generation Tests
 ```bash
 # Run all tests (331 tests from Phase 2 semantic system)
@@ -272,8 +298,6 @@ pytest
 # Run LLM analyzer tests
 pytest tests/test_llm_analyzer.py
 ```
-
-**Note:** Phase 3 LLM system tested through actual usage and manual validation.
 
 ### Document Formatting Tests
 ```bash
