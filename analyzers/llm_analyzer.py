@@ -97,7 +97,9 @@ class LLMAnalyzer:
         """
         from .llm_prompt_templates import PHILOSOPHY_PROMPT
 
-        prompt = PHILOSOPHY_PROMPT.format(documents=formatted_docs)
+        # Wrap user content in XML tags to prevent prompt injection
+        safe_documents = f"<user_documents>\n{formatted_docs}\n</user_documents>"
+        prompt = PHILOSOPHY_PROMPT.format(documents=safe_documents)
 
         response = self.client.messages.create(
             model=self.model,
@@ -138,7 +140,9 @@ class LLMAnalyzer:
         """
         from .llm_prompt_templates import ACHIEVEMENTS_PROMPT
 
-        prompt = ACHIEVEMENTS_PROMPT.format(documents=formatted_docs)
+        # Wrap user content in XML tags to prevent prompt injection
+        safe_documents = f"<user_documents>\n{formatted_docs}\n</user_documents>"
+        prompt = ACHIEVEMENTS_PROMPT.format(documents=safe_documents)
 
         response = self.client.messages.create(
             model=self.model,
@@ -175,7 +179,9 @@ class LLMAnalyzer:
         """
         from .llm_prompt_templates import NARRATIVES_PROMPT
 
-        prompt = NARRATIVES_PROMPT.format(documents=formatted_docs)
+        # Wrap user content in XML tags to prevent prompt injection
+        safe_documents = f"<user_documents>\n{formatted_docs}\n</user_documents>"
+        prompt = NARRATIVES_PROMPT.format(documents=safe_documents)
 
         response = self.client.messages.create(
             model=self.model,
@@ -212,7 +218,9 @@ class LLMAnalyzer:
         """
         from .llm_prompt_templates import LANGUAGE_PROMPT
 
-        prompt = LANGUAGE_PROMPT.format(documents=formatted_docs)
+        # Wrap user content in XML tags to prevent prompt injection
+        safe_documents = f"<user_documents>\n{formatted_docs}\n</user_documents>"
+        prompt = LANGUAGE_PROMPT.format(documents=safe_documents)
 
         response = self.client.messages.create(
             model=self.model,

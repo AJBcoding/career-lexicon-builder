@@ -242,6 +242,62 @@ class TestManifestLoadSave:
             assert isinstance(manifest, ProcessingManifest)
             assert len(manifest.documents) == 0  # Should return empty on error
 
+    def test_save_manifest_creates_nested_directory_structure(self):
+        """Test that save_manifest creates nested directory structure."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            nested_path = os.path.join(tmpdir, "level1", "level2", "manifest.json")
+
+            record = DocumentRecord(
+                filepath="doc.pdf", file_hash="testhash123",
+                document_type="resume",
+                date_processed=datetime.now().isoformat(),
+                date_from_filename=None, extraction_success=True
+            )
+            manifest = ProcessingManifest(
+                last_updated=datetime.now().isoformat(),
+                documents={"doc.pdf": record}, version="1.0.0"
+            )
+
+            save_manifest(manifest, nested_path)
+            assert os.path.exists(nested_path)
+            assert os.path.isdir(os.path.dirname(nested_path))
+
+    def test_needs_processing_handles_file_permission_error(self):
+        """Test that needs_processing handles file permission errors gracefully."""
+        with tempfile.NamedTemporaryFile(delete=False) as tmp:
+            tmp.write(b"test content for permission test")
+            tmp.flush()
+            tmp_path = tmp.name
+
+        try:
+            manifest = ProcessingManifest(
+                last_updated=datetime.now().isoformat(),
+                documents={}, version="1.0.0"
+            )
+
+            # Add file to manifest first so it checks hash
+            file_hash = compute_file_hash(tmp_path)
+            record = DocumentRecord(
+                filepath=tmp_path,
+                file_hash=file_hash,
+                document_type="resume",
+                date_processed=datetime.now().isoformat(),
+                date_from_filename=None,
+                extraction_success=True
+            )
+            manifest.documents[tmp_path] = record
+
+            # Make file unreadable
+            os.chmod(tmp_path, 0o000)
+
+            # Should return False (skip unreadable files)
+            result = needs_processing(tmp_path, manifest)
+            assert result is False
+        finally:
+            # Restore permissions for cleanup
+            os.chmod(tmp_path, 0o644)
+            os.unlink(tmp_path)
+
 
 class TestNeedsProcessing:
     """Tests for change detection."""

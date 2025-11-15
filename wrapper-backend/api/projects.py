@@ -10,6 +10,9 @@ from models.project import ProjectState
 from models.db_models import User
 from utils.auth import get_current_user
 from database import get_db
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/projects", tags=["projects"])
 
@@ -40,8 +43,19 @@ async def create_project(
     state_file = project_path / ".project-state.json"
 
     import json
-    state_data = json.loads(state_file.read_text())
-    return ProjectState(**state_data)
+    try:
+        state_data = json.loads(state_file.read_text())
+        return ProjectState(**state_data)
+    except json.JSONDecodeError as e:
+        logger.error(f"Failed to parse project state JSON: {e}", extra={
+            'project_id': project_id,
+            'state_file': str(state_file)
+        })
+        logger.debug(f"Invalid JSON content: {state_file.read_text()[:200]}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Invalid project state file: {e}"
+        )
 
 @router.get("", response_model=List[ProjectState])
 async def list_projects(

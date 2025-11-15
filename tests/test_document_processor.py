@@ -294,6 +294,54 @@ class TestClassifyByContent:
         assert doc_type == DocumentType.RESUME
         assert confidence >= 0.5
 
+    def test_resume_high_bullet_density_with_sufficient_text(self):
+        """Test resume detection with high bullet point density (>0.02) and sufficient text length."""
+        text = """
+        Experience
+
+        Senior Software Engineer | TechCorp | 2020-2024
+        • Architected microservices platform serving 1M users
+        • Led team of 8 engineers through major system redesign
+        • Designed and implemented CI/CD pipeline reducing deployment time by 60%
+        • Mentored 5 junior developers with code review process
+        • Implemented real-time monitoring reducing incident response time by 40%
+
+        Software Engineer | StartupCo | 2018-2020
+        • Built REST API handling 10K requests per second
+        • Optimized database queries improving performance by 50%
+        • Implemented caching strategy reducing load time by 30%
+
+        Education
+        B.S. Computer Science | University of California | 2018
+
+        Skills
+        Python, JavaScript, AWS, Docker, Kubernetes, PostgreSQL
+        """
+
+        doc_type, conf, reasoning = classify_by_content(text)
+        assert doc_type == DocumentType.RESUME
+        assert conf > 0.7
+        assert "bullet-heavy structure" in reasoning.lower()
+        assert "date range" in reasoning.lower()
+
+    def test_job_description_single_phrase_signal(self):
+        """Test job description with exactly one job posting phrase."""
+        text = """
+        Position Title: Software Engineer
+        Location: San Francisco, CA
+
+        We are seeking a talented engineer to join our team.
+
+        Salary: $120,000 - $160,000
+        Benefits: Health insurance, 401k, stock options
+
+        Apply at: careers.example.com
+        """
+
+        doc_type, conf, reasoning = classify_by_content(text)
+        assert doc_type == DocumentType.JOB_DESCRIPTION
+        assert "1 job posting phrase" in reasoning.lower()
+
 
 class TestClassifyDocument:
     """Tests for classify_document function."""

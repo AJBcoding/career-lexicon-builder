@@ -3,8 +3,18 @@ from pathlib import Path
 from typing import Dict, Any, Callable, Optional
 import asyncio
 import logging
+from fastapi import HTTPException
 
 logger = logging.getLogger(__name__)
+
+# Define whitelist of allowed skills to prevent command injection
+ALLOWED_SKILLS = {
+    'job-description-analysis',
+    'resume-alignment',
+    'job-fit-analysis',
+    'cover-letter-voice',
+    'collaborative-writing'
+}
 
 class SkillService:
     def __init__(self, claude_path: str = "claude"):
@@ -17,6 +27,13 @@ class SkillService:
         prompt: str
     ) -> Dict[str, Any]:
         """Invoke a Claude Code skill in the project directory"""
+        # VALIDATE SKILL NAME BEFORE USE - prevents command injection
+        if skill_name not in ALLOWED_SKILLS:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid skill name. Allowed: {', '.join(sorted(ALLOWED_SKILLS))}"
+            )
+
         logger.info("Executing skill", extra={
             'skill_name': skill_name,
             'project_path': str(project_path),
@@ -78,6 +95,13 @@ class SkillService:
         on_output: Optional[Callable[[str], None]] = None
     ) -> Dict[str, Any]:
         """Invoke skill with streaming output"""
+        # VALIDATE SKILL NAME BEFORE USE - prevents command injection
+        if skill_name not in ALLOWED_SKILLS:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid skill name. Allowed: {', '.join(sorted(ALLOWED_SKILLS))}"
+            )
+
         logger.info("Executing skill (streaming)", extra={
             'skill_name': skill_name,
             'project_path': str(project_path),

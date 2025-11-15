@@ -7,6 +7,8 @@ import zipfile
 import tempfile
 import os
 from pathlib import Path
+from unittest.mock import MagicMock, patch
+from datetime import datetime
 from utils.text_extraction import (
     extract_text_from_document,
     extract_metadata,
@@ -580,47 +582,89 @@ class TestPDFDocumentProcessing:
         finally:
             os.unlink(tmp_path)
 
-    @pytest.mark.skip("Requires pdfplumber in pytest environment")
-    def test_pdf_with_metadata_extraction(self):
+    @patch('utils.text_extraction.pdfplumber')
+    def test_pdf_with_metadata_extraction(self, mock_pdfplumber):
         """
         Test PDF extraction with metadata fields.
 
         Coverage gap: Lines 403-432 (PDF metadata extraction)
         Priority: HIGH - Metadata handling
-        NOTE: Skipped due to pytest environment lacking pdfplumber
         """
-        from unittest.mock import MagicMock, patch
-
         # Create a temp file
         with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as tmp:
+            tmp.write(b'%PDF-1.4 fake pdf content')
+            tmp.flush()
             tmp_path = tmp.name
 
         try:
-            # Patch pdfplumber.open directly to mock PDF with metadata
-            with patch('pdfplumber.open') as mock_open:
-                mock_pdf = MagicMock()
-                mock_page = MagicMock()
-                mock_page.extract_text.return_value = "Test PDF content with metadata"
-                mock_pdf.pages = [mock_page]
+            # Mock pdfplumber behavior
+            mock_pdf = MagicMock()
+            mock_page = MagicMock()
+            mock_page.extract_text.return_value = "Test PDF content with metadata"
+            mock_pdf.pages = [mock_page]
 
-                # Add metadata that will trigger lines 406-412
-                mock_pdf.metadata = {
-                    'Title': 'Test Document',
-                    'Author': 'Test Author',
-                    'Subject': 'Test Subject',
-                    'CreationDate': 'D:20240315120000'
-                }
+            # Add metadata that will trigger lines 406-412
+            mock_pdf.metadata = {
+                'Title': 'Test Document',
+                'Author': 'Test Author',
+                'Subject': 'Test Subject',
+                'CreationDate': 'D:20240315120000'
+            }
 
-                # Set up context manager
-                mock_open.return_value.__enter__.return_value = mock_pdf
-                mock_open.return_value.__exit__.return_value = None
+            # Set up context manager
+            mock_pdfplumber.open.return_value.__enter__.return_value = mock_pdf
+            mock_pdfplumber.open.return_value.__exit__.return_value = None
 
-                result = extract_text_from_document(tmp_path)
+            result = extract_text_from_document(tmp_path)
 
-                # Verify extraction succeeded and metadata path was taken
-                assert result['success'] is True
-                assert 'Test PDF content with metadata' in result['text']
-                assert result['extraction_method'] == 'pdf'
+            # Verify extraction succeeded and metadata path was taken
+            assert result['success'] is True
+            assert 'Test PDF content with metadata' in result['text']
+            assert result['extraction_method'] == 'pdf'
+            assert result['metadata']['pdf_title'] == 'Test Document'
+            assert result['metadata']['pdf_author'] == 'Test Author'
+            assert result['metadata']['pdf_subject'] == 'Test Subject'
+            assert result['metadata']['page_count'] == 1
+        finally:
+            if os.path.exists(tmp_path):
+                os.unlink(tmp_path)
+
+    @patch('utils.text_extraction.pdfplumber')
+    def test_pdf_with_multiple_pages(self, mock_pdfplumber):
+        """
+        Test PDF extraction with multiple pages.
+
+        Coverage gap: Lines 415-418 (multi-page PDF handling)
+        Priority: MEDIUM - Multi-page support
+        """
+        with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as tmp:
+            tmp.write(b'%PDF-1.4')
+            tmp.flush()
+            tmp_path = tmp.name
+
+        try:
+            # Mock PDF with multiple pages
+            mock_pdf = MagicMock()
+            mock_page1 = MagicMock()
+            mock_page1.extract_text.return_value = "Page 1 content"
+            mock_page2 = MagicMock()
+            mock_page2.extract_text.return_value = "Page 2 content"
+            mock_page3 = MagicMock()
+            mock_page3.extract_text.return_value = "Page 3 content"
+            mock_pdf.pages = [mock_page1, mock_page2, mock_page3]
+            mock_pdf.metadata = {}
+
+            mock_pdfplumber.open.return_value.__enter__.return_value = mock_pdf
+            mock_pdfplumber.open.return_value.__exit__.return_value = None
+
+            result = extract_text_from_document(tmp_path)
+
+            # Verify all pages extracted
+            assert result['success'] is True
+            assert 'Page 1 content' in result['text']
+            assert 'Page 2 content' in result['text']
+            assert 'Page 3 content' in result['text']
+            assert result['metadata']['page_count'] == 3
         finally:
             if os.path.exists(tmp_path):
                 os.unlink(tmp_path)
@@ -680,59 +724,102 @@ class TestDOCXDocumentProcessing:
         finally:
             os.unlink(tmp_path)
 
-    @pytest.mark.skip("Requires python-docx in pytest environment")
-    def test_docx_with_metadata_and_tables(self):
+    @patch('utils.text_extraction.Document')
+    def test_docx_with_metadata_and_tables(self, mock_document_class):
         """
         Test DOCX extraction with metadata and tables.
 
         Coverage gap: Lines 481-523 (DOCX metadata and table extraction)
         Priority: HIGH - Comprehensive document handling
-        NOTE: Skipped due to pytest environment lacking python-docx
         """
-        from unittest.mock import MagicMock, patch
-        from datetime import datetime
-
         with tempfile.NamedTemporaryFile(suffix='.docx', delete=False) as tmp:
+            tmp.write(b'PK\x03\x04')  # Minimal zip signature
+            tmp.flush()
             tmp_path = tmp.name
 
         try:
-            # Patch docx.Document directly
-            with patch('docx.Document') as mock_document_class:
-                mock_doc = MagicMock()
+            # Mock Document instance
+            mock_doc = MagicMock()
 
-                # Mock core properties (lines 482-492)
-                mock_props = MagicMock()
-                mock_props.title = 'Test Document'
-                mock_props.author = 'Test Author'
-                mock_props.created = datetime(2024, 3, 15, 10, 30)
-                mock_props.modified = datetime(2024, 3, 15, 14, 30)
-                mock_doc.core_properties = mock_props
+            # Mock core properties (lines 482-492)
+            mock_props = MagicMock()
+            mock_props.title = 'Test Document'
+            mock_props.author = 'Test Author'
+            mock_props.created = datetime(2024, 3, 15, 10, 30)
+            mock_props.modified = datetime(2024, 3, 15, 14, 30)
+            mock_doc.core_properties = mock_props
 
-                # Mock paragraphs (lines 495-497)
-                mock_para = MagicMock()
-                mock_para.text = 'Test paragraph content'
-                mock_doc.paragraphs = [mock_para]
+            # Mock paragraphs (lines 495-497)
+            mock_para = MagicMock()
+            mock_para.text = 'Test paragraph content'
+            mock_doc.paragraphs = [mock_para]
 
-                # Mock tables (lines 502-509)
-                mock_cell1 = MagicMock()
-                mock_cell1.text = 'Cell 1'
-                mock_cell2 = MagicMock()
-                mock_cell2.text = 'Cell 2'
-                mock_row = MagicMock()
-                mock_row.cells = [mock_cell1, mock_cell2]
-                mock_table = MagicMock()
-                mock_table.rows = [mock_row]
-                mock_doc.tables = [mock_table]
+            # Mock tables (lines 502-509)
+            mock_cell1 = MagicMock()
+            mock_cell1.text = 'Cell 1'
+            mock_cell2 = MagicMock()
+            mock_cell2.text = 'Cell 2'
+            mock_row = MagicMock()
+            mock_row.cells = [mock_cell1, mock_cell2]
+            mock_table = MagicMock()
+            mock_table.rows = [mock_row]
+            mock_doc.tables = [mock_table]
 
-                mock_document_class.return_value = mock_doc
+            mock_document_class.return_value = mock_doc
 
-                result = extract_text_from_document(tmp_path)
+            result = extract_text_from_document(tmp_path)
 
-                # Verify extraction succeeded
-                assert result['success'] is True
-                assert 'Test paragraph content' in result['text']
-                assert 'Cell 1' in result['text']
-                assert result['extraction_method'] == 'docx'
+            # Verify extraction succeeded
+            assert result['success'] is True
+            assert 'Test paragraph content' in result['text']
+            assert 'Cell 1' in result['text']
+            assert 'Cell 2' in result['text']
+            assert result['extraction_method'] == 'docx'
+            assert result['metadata']['doc_title'] == 'Test Document'
+            assert result['metadata']['doc_author'] == 'Test Author'
+            assert result['metadata']['paragraph_count'] == 1
+            assert result['metadata']['table_count'] == 1
+        finally:
+            if os.path.exists(tmp_path):
+                os.unlink(tmp_path)
+
+    @patch('utils.text_extraction.Document')
+    def test_docx_without_core_properties(self, mock_document_class):
+        """
+        Test DOCX extraction when core properties raise exception.
+
+        Coverage gap: Lines 491-492 (core properties exception handling)
+        Priority: MEDIUM - Exception handling
+        """
+        with tempfile.NamedTemporaryFile(suffix='.docx', delete=False) as tmp:
+            tmp.write(b'PK\x03\x04')
+            tmp.flush()
+            tmp_path = tmp.name
+
+        try:
+            # Mock Document instance
+            mock_doc = MagicMock()
+
+            # Make core_properties raise an exception
+            mock_doc.core_properties = MagicMock()
+            type(mock_doc.core_properties).title = MagicMock(side_effect=Exception("Property unavailable"))
+
+            # Mock paragraphs
+            mock_para = MagicMock()
+            mock_para.text = 'Content without metadata'
+            mock_doc.paragraphs = [mock_para]
+            mock_doc.tables = []
+
+            mock_document_class.return_value = mock_doc
+
+            result = extract_text_from_document(tmp_path)
+
+            # Should still succeed even if metadata extraction fails
+            assert result['success'] is True
+            assert 'Content without metadata' in result['text']
+            assert result['extraction_method'] == 'docx'
+            # Metadata fields should not include doc_title, doc_author, etc.
+            assert 'doc_title' not in result['metadata']
         finally:
             if os.path.exists(tmp_path):
                 os.unlink(tmp_path)
@@ -784,43 +871,40 @@ class TestTextCleanupFunctions:
         assert result['success'] is False
         assert 'File not found' in result['error']
 
-    @pytest.mark.skip("Requires pdfplumber in pytest environment")
-    def test_pdf_preview_successful_extraction(self):
+    @patch('utils.text_extraction.pdfplumber')
+    def test_pdf_preview_successful_extraction(self, mock_pdfplumber):
         """
         Test successful PDF preview extraction from .pages file.
 
         Coverage gap: Lines 333-349 (PDF preview extraction success path)
         Priority: HIGH - Pages file handling
-        NOTE: Skipped due to pytest environment lacking pdfplumber
         """
-        from unittest.mock import patch, MagicMock
-        import zipfile
-
         # Create a minimal .pages file (zip with QuickLook/Preview.pdf)
         with tempfile.TemporaryDirectory() as tmpdir:
             pages_file = os.path.join(tmpdir, 'test.pages')
 
             # Create a zip file with Preview.pdf
             with zipfile.ZipFile(pages_file, 'w') as zf:
-                zf.writestr('QuickLook/Preview.pdf', b'PDF placeholder')
+                zf.writestr('QuickLook/Preview.pdf', b'%PDF-1.4 placeholder')
 
-            # Patch pdfplumber.open directly
-            with patch('pdfplumber.open') as mock_open:
-                mock_pdf = MagicMock()
-                mock_page = MagicMock()
-                mock_page.extract_text.return_value = "Extracted preview text from Pages"
-                mock_pdf.pages = [mock_page]
+            # Mock pdfplumber behavior
+            mock_pdf = MagicMock()
+            mock_page = MagicMock()
+            mock_page.extract_text.return_value = "Extracted preview text from Pages"
+            mock_pdf.pages = [mock_page]
 
-                # Set up context manager
-                mock_open.return_value.__enter__.return_value = mock_pdf
-                mock_open.return_value.__exit__.return_value = None
+            # Set up context manager
+            mock_pdfplumber.open.return_value.__enter__.return_value = mock_pdf
+            mock_pdfplumber.open.return_value.__exit__.return_value = None
 
-                result = extract_text_from_document(pages_file)
+            result = extract_text_from_document(pages_file)
 
-                # Should successfully extract from PDF preview
-                assert result['success'] is True
-                assert 'Extracted preview text from Pages' in result['text']
-                assert result['extraction_method'] == 'pdf_preview'
+            # Should successfully extract from PDF preview
+            assert result['success'] is True
+            assert 'Extracted preview text from Pages' in result['text']
+            assert result['extraction_method'] == 'pdf_preview'
+            assert 'note' in result['metadata']
+            assert 'PDF preview' in result['metadata']['note']
 
 
     def test_text_file_all_encodings_fail(self):
@@ -912,7 +996,6 @@ class TestHelperFunctions:
 class TestDocumentTypeDetection:
     """Tests for document type detection logic (Lines 269-270)."""
 
-    @pytest.mark.skip("TODO: Implement - test type detection from content")
     def test_document_type_detection_from_content(self):
         """
         Test automatic detection of document type from content.
@@ -920,9 +1003,44 @@ class TestDocumentTypeDetection:
         Coverage gap: Lines 269-270
         Priority: MEDIUM - Type classification
         """
-        pass
+        # Test that the correct extraction method is chosen based on file extension
+        test_files = {
+            '.txt': 'text',
+            '.md': 'text',
+            '.pdf': 'pdf',
+            '.docx': 'docx',
+            '.pages': 'pages'
+        }
 
-    @pytest.mark.skip("TODO: Implement - test type detection edge cases")
+        for ext, expected_type in test_files.items():
+            with tempfile.NamedTemporaryFile(suffix=ext, delete=False) as tmp:
+                if ext in ['.txt', '.md']:
+                    tmp.write(b'Test content')
+                elif ext == '.pages':
+                    # Create valid zip with index.xml
+                    with zipfile.ZipFile(tmp.name, 'w') as zf:
+                        zf.writestr('index.xml', '<?xml version="1.0"?><document><body><p>Test</p></body></document>')
+                else:
+                    tmp.write(b'Binary content')
+                tmp.flush()
+                tmp_path = tmp.name
+
+            try:
+                result = extract_text_from_document(tmp_path)
+                # Verify the file type was correctly detected
+                assert 'extraction_method' in result
+                if ext in ['.txt', '.md']:
+                    # Text files should succeed
+                    assert result['success'] is True
+                    assert result['extraction_method'] == expected_type
+                elif ext == '.pages':
+                    # Pages with index.xml should succeed with xml method
+                    assert result['success'] is True
+                    assert result['extraction_method'] == 'xml'
+            finally:
+                if os.path.exists(tmp_path):
+                    os.unlink(tmp_path)
+
     def test_document_type_detection_edge_cases(self):
         """
         Test type detection with ambiguous content.
@@ -930,13 +1048,40 @@ class TestDocumentTypeDetection:
         Coverage gap: Type detection edge cases
         Priority: LOW - Edge case handling
         """
-        pass
+        # Test file with no extension
+        with tempfile.NamedTemporaryFile(suffix='', delete=False) as tmp:
+            tmp.write(b'Content without extension')
+            tmp.flush()
+            tmp_path = tmp.name
+
+        try:
+            result = extract_text_from_document(tmp_path)
+            # Should fail with unsupported format error
+            assert result['success'] is False
+            assert 'Unsupported file format' in result['error']
+        finally:
+            if os.path.exists(tmp_path):
+                os.unlink(tmp_path)
+
+        # Test file with uppercase extension
+        with tempfile.NamedTemporaryFile(suffix='.TXT', delete=False) as tmp:
+            tmp.write(b'Uppercase extension test')
+            tmp.flush()
+            tmp_path = tmp.name
+
+        try:
+            result = extract_text_from_document(tmp_path)
+            # Should handle uppercase extensions (they're converted to lowercase)
+            assert result['success'] is True
+            assert result['extraction_method'] == 'text'
+        finally:
+            if os.path.exists(tmp_path):
+                os.unlink(tmp_path)
 
 
 class TestErrorHandlingPaths:
     """Tests for error handling code paths (Line 170)."""
 
-    @pytest.mark.skip("TODO: Implement - test extraction error recovery")
     def test_extraction_error_recovery(self):
         """
         Test recovery from extraction errors.
@@ -944,14 +1089,60 @@ class TestErrorHandlingPaths:
         Coverage gap: Line 170
         Priority: HIGH - Error handling
         """
-        pass
+        # Test XML extraction failure that should trigger PDF preview fallback
+        with tempfile.NamedTemporaryFile(suffix='.pages', delete=False) as tmp:
+            # Create a zip file with corrupted XML
+            with zipfile.ZipFile(tmp.name, 'w') as zf:
+                # Add malformed XML that will cause parsing to fail
+                zf.writestr('index.xml', '<?xml version="1.0"?><unclosed_tag>')
 
-    @pytest.mark.skip("TODO: Implement - test partial extraction success")
-    def test_partial_extraction_success(self):
+            tmp_path = tmp.name
+
+        try:
+            result = extract_text_from_document(tmp_path)
+            # Should fail gracefully when both XML and PDF preview extraction fail
+            assert result['success'] is False
+            assert 'error' in result
+            # Error message should indicate the issue
+            assert result['extraction_method'] == 'failed'
+        finally:
+            if os.path.exists(tmp_path):
+                os.unlink(tmp_path)
+
+    @patch('utils.text_extraction.pdfplumber')
+    def test_partial_extraction_success(self, mock_pdfplumber):
         """
         Test handling of partially successful extractions.
 
         Coverage gap: Partial success scenarios
         Priority: MEDIUM - Error recovery
         """
-        pass
+        # Test Pages file where XML extraction fails but PDF preview succeeds
+        with tempfile.NamedTemporaryFile(suffix='.pages', delete=False) as tmp:
+            # Create zip with both malformed XML and Preview.pdf
+            with zipfile.ZipFile(tmp.name, 'w') as zf:
+                # Malformed XML (will fail)
+                zf.writestr('index.xml', '<?xml version="1.0"?><malformed>')
+                # But include a Preview.pdf (will succeed with mock)
+                zf.writestr('QuickLook/Preview.pdf', b'%PDF-1.4')
+
+            tmp_path = tmp.name
+
+        try:
+            # Mock successful PDF extraction
+            mock_pdf = MagicMock()
+            mock_page = MagicMock()
+            mock_page.extract_text.return_value = "Recovered content from PDF preview"
+            mock_pdf.pages = [mock_page]
+            mock_pdfplumber.open.return_value.__enter__.return_value = mock_pdf
+            mock_pdfplumber.open.return_value.__exit__.return_value = None
+
+            result = extract_text_from_document(tmp_path)
+
+            # Should succeed via PDF preview fallback
+            assert result['success'] is True
+            assert result['extraction_method'] == 'pdf_preview'
+            assert 'Recovered content from PDF preview' in result['text']
+        finally:
+            if os.path.exists(tmp_path):
+                os.unlink(tmp_path)

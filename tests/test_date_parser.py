@@ -180,6 +180,20 @@ class TestCompareDates:
         ]
         assert sorted_dates == expected
 
+    def test_invalid_month_name_with_year(self):
+        """Test that invalid month names return None gracefully."""
+        # Pattern won't match but won't raise KeyError
+        result = extract_date_from_filename("InvalidMonth2024-letter.pages")
+        assert result is None
+
+        # Test month number 00 triggers ValueError in YYYY-MM format
+        result = extract_date_from_filename("2024-00-letter.pages")
+        assert result is None
+
+        # Test month 13 is invalid
+        result = extract_date_from_filename("2024-13-letter.pages")
+        assert result is None
+
 
 # ============================================================================
 # COVERAGE GAP STUBS - To be implemented
