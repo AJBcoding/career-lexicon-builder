@@ -85,16 +85,34 @@ class ProjectService:
                     if project_dir.is_dir() and project_dir.name in project_ids:
                         state_file = project_dir / ".project-state.json"
                         if state_file.exists():
-                            state_data = json.loads(state_file.read_text())
-                            projects.append(ProjectState(**state_data))
+                            try:
+                                state_data = json.loads(state_file.read_text())
+                                projects.append(ProjectState(**state_data))
+                            except json.JSONDecodeError as e:
+                                logger.error(f"Failed to parse project state JSON: {e}", extra={
+                                    'project_id': project_dir.name,
+                                    'state_file': str(state_file)
+                                })
+                                logger.debug(f"Invalid JSON content: {state_file.read_text()[:200]}")
+                                # Skip this project and continue with others
+                                continue
             else:
                 # No filtering - list all projects
                 for project_dir in self.applications_dir.iterdir():
                     if project_dir.is_dir():
                         state_file = project_dir / ".project-state.json"
                         if state_file.exists():
-                            state_data = json.loads(state_file.read_text())
-                            projects.append(ProjectState(**state_data))
+                            try:
+                                state_data = json.loads(state_file.read_text())
+                                projects.append(ProjectState(**state_data))
+                            except json.JSONDecodeError as e:
+                                logger.error(f"Failed to parse project state JSON: {e}", extra={
+                                    'project_id': project_dir.name,
+                                    'state_file': str(state_file)
+                                })
+                                logger.debug(f"Invalid JSON content: {state_file.read_text()[:200]}")
+                                # Skip this project and continue with others
+                                continue
 
             logger.info("Projects listed", extra={
                 'count': len(projects),

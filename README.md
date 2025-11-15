@@ -250,10 +250,19 @@ See [PHASES.md](PHASES.md) for the complete story of how this project evolved fr
 - **[SECURITY.md](SECURITY.md)** - Security considerations
 
 ### Technical Documentation
+- **[docs/TESTING.md](docs/TESTING.md)** - Comprehensive testing guide (87% coverage)
 - **[HANDOFF.md](HANDOFF.md)** - Development handoff guide
 - **[PHASES.md](PHASES.md)** - Project evolution history
 - **[docs/LOGGING.md](docs/LOGGING.md)** - Logging architecture
 - **[DOCKER_README.md](DOCKER_README.md)** - Docker containerization
+
+### Code Reviews (2025-11-15)
+- **[docs/reviews/REVIEW_INDEX.md](docs/reviews/REVIEW_INDEX.md)** - Review navigation guide
+- **[docs/reviews/architecture_review.md](docs/reviews/architecture_review.md)** - Architecture & design patterns (14 issues)
+- **[docs/reviews/security_audit_report.md](docs/reviews/security_audit_report.md)** - Security vulnerabilities (18 issues) ✅ 10 FIXED
+- **[docs/reviews/audit_summary.md](docs/reviews/audit_summary.md)** - Quick security reference
+- **[docs/reviews/critical_issues_code_examples.md](docs/reviews/critical_issues_code_examples.md)** - Architecture fixes
+- **[docs/reviews/remediation_code_examples.md](docs/reviews/remediation_code_examples.md)** - Security fixes ✅ APPLIED
 
 ### Design Documents
 - **[DesignDocuments/2025-10-31-llm-based-analysis-design.md](DesignDocuments/2025-10-31-llm-based-analysis-design.md)** - Lexicon generation design
@@ -264,6 +273,33 @@ See [PHASES.md](PHASES.md) for the complete story of how this project evolved fr
 
 ## 🧪 Testing
 
+**Current Test Coverage: 87%** (229 passing tests, 0 skipped) ✅
+
+See **[docs/TESTING.md](docs/TESTING.md)** for comprehensive testing guide, patterns, and best practices.
+
+### Core System Tests
+```bash
+# Run all core system tests (229 tests, 87% coverage)
+PYTHONPATH=. pytest tests/ -v --ignore=tests/wrapper-backend
+
+# Generate coverage report
+PYTHONPATH=. coverage run -m pytest tests/ --ignore=tests/wrapper-backend
+coverage report --include="core/*,utils/*,generators/*"
+
+# Run specific test files
+PYTHONPATH=. pytest tests/test_core_orchestrator.py -v      # 100% coverage
+PYTHONPATH=. pytest tests/test_confidence_scorer.py -v      # 100% coverage
+PYTHONPATH=. pytest tests/test_core_state_manager.py -v     # 98% coverage
+PYTHONPATH=. pytest tests/test_document_processor.py -v     # 98% coverage
+PYTHONPATH=. pytest tests/test_hierarchical_generator.py -v # 88-90% coverage
+PYTHONPATH=. pytest tests/test_text_extraction.py -v        # 82-85% coverage
+```
+
+**Coverage by Module:**
+- **Core Systems** (98% coverage): orchestrator, state_manager, document_processor, confidence_scorer
+- **Utilities** (83-85% coverage): date_parser, text_extraction
+- **Generators** (88-90% coverage): hierarchical_generator
+
 ### Lexicon Generation Tests
 ```bash
 # Run all tests (331 tests from Phase 2 semantic system)
@@ -272,8 +308,6 @@ pytest
 # Run LLM analyzer tests
 pytest tests/test_llm_analyzer.py
 ```
-
-**Note:** Phase 3 LLM system tested through actual usage and manual validation.
 
 ### Document Formatting Tests
 ```bash

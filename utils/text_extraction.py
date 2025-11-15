@@ -488,8 +488,9 @@ def _extract_docx(filepath: str) -> Dict:
                 metadata['doc_created'] = str(core_props.created)
             if core_props.modified:
                 metadata['doc_modified'] = str(core_props.modified)
-        except:
-            pass  # Core properties may not be available
+        except Exception as e:
+            # Core properties may not be available in some documents
+            pass
 
         # Extract paragraphs
         for para in doc.paragraphs:

@@ -82,7 +82,19 @@ async def websocket_endpoint(websocket: WebSocket, project_id: str):
         while True:
             # Receive messages from client
             data = await websocket.receive_text()
-            message = json.loads(data)
+
+            try:
+                message = json.loads(data)
+            except json.JSONDecodeError as e:
+                logger.error(f"Failed to parse WebSocket message JSON: {e}", extra={
+                    'project_id': project_id
+                })
+                logger.debug(f"Invalid JSON received: {data[:200]}")
+                await manager.send_personal_message(
+                    {"type": "error", "message": "Invalid JSON format"},
+                    websocket
+                )
+                continue
 
             # Heartbeat/ping-pong
             if message.get("type") == "ping":

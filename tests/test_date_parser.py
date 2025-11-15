@@ -179,3 +179,107 @@ class TestCompareDates:
             None
         ]
         assert sorted_dates == expected
+
+    def test_invalid_month_name_with_year(self):
+        """Test that invalid month names return None gracefully."""
+        # Pattern won't match but won't raise KeyError
+        result = extract_date_from_filename("InvalidMonth2024-letter.pages")
+        assert result is None
+
+        # Test month number 00 triggers ValueError in YYYY-MM format
+        result = extract_date_from_filename("2024-00-letter.pages")
+        assert result is None
+
+        # Test month 13 is invalid
+        result = extract_date_from_filename("2024-13-letter.pages")
+        assert result is None
+
+
+# ============================================================================
+# COVERAGE GAP STUBS - To be implemented
+# ============================================================================
+
+class TestDateParserEdgeCases:
+    """Tests for date parser edge cases (Lines 81-82, 93-94)."""
+
+    def test_malformed_date_string_handling(self):
+        """
+        Test handling of malformed date strings that cause ValueError.
+
+        Coverage gap: Lines 81-82, 93-94
+        Priority: MEDIUM - Error handling
+        """
+        # Test invalid month in YYYY-MM format (line 81-82)
+        result = extract_date_from_filename("2024-00-letter.pages")
+        assert result is None  # Should gracefully return None
+
+        result = extract_date_from_filename("2024-13-letter.pages")
+        assert result is None  # Month 13 is invalid
+
+        # Test invalid month name (line 93-94)
+        result = extract_date_from_filename("Marchember2024-letter.pages")
+        # Should not match invalid month name
+        # (Will try MonthYYYY pattern but won't find valid month)
+
+    def test_boundary_year_values(self):
+        """
+        Test year values at boundaries of valid range that cause OverflowError.
+
+        Coverage gap: Lines 81-82, 93-94
+        Priority: LOW - Edge case validation
+        """
+        # Test year that causes OverflowError
+        # Python's date.max is year 9999
+        result = extract_date_from_filename("10000-01-letter.pages")
+        assert result is None  # Should handle OverflowError gracefully
+
+        # Test valid maximum year (9999)
+        result = extract_date_from_filename("March-9999-letter.pages")
+        assert result == date(9999, 3, 1)  # Should work for max valid year
+
+        # Test negative year (invalid)
+        result = extract_date_from_filename("-2024-03-15-letter.pages")
+        # Regex won't match negative years, so should return None
+
+        # Test year 0 (invalid for date)
+        result = extract_date_from_filename("0000-01-01-letter.pages")
+        assert result is None  # Year 0 doesn't exist in datetime
+
+    def test_leap_year_date_parsing(self):
+        """
+        Test parsing of leap year dates (Feb 29).
+
+        Coverage gap: Leap year handling
+        Priority: LOW - Special date handling
+        """
+        # Valid leap year date
+        result = extract_date_from_filename("2024-02-29-letter.pages")
+        assert result == date(2024, 2, 29)  # 2024 is a leap year
+
+        # Invalid leap year date (2023 is not a leap year)
+        result = extract_date_from_filename("2023-02-29-letter.pages")
+        assert result is None  # Should return None for invalid date
+
+        # Test February 29 in non-leap year returns None
+        result = extract_date_from_filename("2025-02-29-letter.pages")
+        assert result is None
+
+    def test_timezone_considerations(self):
+        """
+        Test that date parser doesn't handle timezone information.
+
+        Coverage gap: Timezone handling (not implemented)
+        Priority: LOW - Extended functionality
+        """
+        # Date parser extracts dates only, not times or timezones
+        # Verify it ignores timezone info in filename
+        result = extract_date_from_filename("2024-03-15-EST-letter.pages")
+        assert result == date(2024, 3, 15)  # Should extract date, ignore timezone
+
+        result = extract_date_from_filename("2024-03-15T10:30:00Z-letter.pages")
+        assert result == date(2024, 3, 15)  # Should extract date part only
+
+        # Verify date objects returned don't have timezone info
+        result = extract_date_from_filename("2024-06-15-letter.pages")
+        assert result is not None
+        assert not hasattr(result, 'tzinfo') or result.tzinfo is None
