@@ -47,9 +47,9 @@ class TestPhilosophyOptionalFields:
             output_path = os.path.join(tmpdir, 'philosophy.md')
 
             data = {
-                'core_values': [
+                'leadership_approaches': [  # Changed to leadership_approaches (has how_to_phrase support)
                     {
-                        'value': 'Test Value',
+                        'name': 'Test Approach',
                         'description': 'Test description',
                         'how_to_phrase': [
                             'Phrase it this way',
@@ -156,13 +156,18 @@ class TestAchievementOptionalFields:
             output_path = os.path.join(tmpdir, 'achievements.md')
 
             data = {
-                'achievements': [
+                'categories': [  # Wrap in categories
                     {
-                        'name': 'Test Achievement',
-                        'description': 'Test description',
-                        'overview': {
-                            'summary': 'This is a test summary of the achievement'
-                        }
+                        'name': 'Test Category',
+                        'achievements': [
+                            {
+                                'name': 'Test Achievement',
+                                'description': 'Test description',
+                                'overview': {
+                                    'summary': 'This is a test summary of the achievement'
+                                }
+                            }
+                        ]
                     }
                 ]
             }
@@ -182,17 +187,22 @@ class TestAchievementOptionalFields:
             output_path = os.path.join(tmpdir, 'achievements.md')
 
             data = {
-                'achievements': [
+                'categories': [
                     {
-                        'name': 'Large Project',
-                        'description': 'Big impact project',
-                        'overview': {
-                            'scale': {
-                                'team_size': '15 engineers',
-                                'budget': '$2M',
-                                'timeline': '18 months'
+                        'name': 'Large Projects',
+                        'achievements': [
+                            {
+                                'name': 'Large Project',
+                                'description': 'Big impact project',
+                                'overview': {
+                                    'scale': {
+                                        'team_size': '15 engineers',
+                                        'budget': '$2M',
+                                        'timeline': '18 months'
+                                    }
+                                }
                             }
-                        }
+                        ]
                     }
                 ]
             }
@@ -213,13 +223,18 @@ class TestAchievementOptionalFields:
             output_path = os.path.join(tmpdir, 'achievements.md')
 
             data = {
-                'achievements': [
+                'categories': [
                     {
-                        'name': 'System Upgrade',
-                        'description': 'Infrastructure modernization',
-                        'overview': {
-                            'context': 'Legacy system serving 10M users needed update'
-                        }
+                        'name': 'Infrastructure',
+                        'achievements': [
+                            {
+                                'name': 'System Upgrade',
+                                'description': 'Infrastructure modernization',
+                                'overview': {
+                                    'context': 'Legacy system serving 10M users needed update'
+                                }
+                            }
+                        ]
                     }
                 ]
             }
@@ -239,22 +254,27 @@ class TestAchievementOptionalFields:
             output_path = os.path.join(tmpdir, 'achievements.md')
 
             data = {
-                'achievements': [
+                'categories': [
                     {
-                        'name': 'Performance Optimization',
-                        'description': 'System improvements',
-                        'variations': [
+                        'name': 'Performance',
+                        'achievements': [
                             {
-                                'emphasis': 'Technical Focus',
-                                'use_for': ['technical roles', 'engineering'],
-                                'text': 'Architected microservices optimization',
-                                'highlights': ['40% latency reduction', 'Zero downtime']
-                            },
-                            {
-                                'emphasis': 'Business Impact',
-                                'use_for': ['executive roles'],
-                                'text': 'Drove cost savings initiative',
-                                'highlights': ['$500K annual savings']
+                                'name': 'Performance Optimization',
+                                'description': 'System improvements',
+                                'variations': [
+                                    {
+                                        'emphasis': 'Technical Focus',
+                                        'use_for': ['technical roles', 'engineering'],
+                                        'text': 'Architected microservices optimization',
+                                        'highlights': ['40% latency reduction', 'Zero downtime']
+                                    },
+                                    {
+                                        'emphasis': 'Business Impact',
+                                        'use_for': ['executive roles'],
+                                        'text': 'Drove cost savings initiative',
+                                        'highlights': ['$500K annual savings']
+                                    }
+                                ]
                             }
                         ]
                     }
@@ -278,18 +298,23 @@ class TestAchievementOptionalFields:
             output_path = os.path.join(tmpdir, 'achievements.md')
 
             data = {
-                'achievements': [
+                'categories': [
                     {
-                        'name': 'System Optimization',
-                        'description': 'Performance improvements',
-                        'quantifiable_outcomes': [
+                        'name': 'Optimization',
+                        'achievements': [
                             {
-                                'metric': 'Response Time',
-                                'description': 'Reduced p95 latency from 500ms to 300ms'
-                            },
-                            {
-                                'metric': 'Cost Savings',
-                                'description': 'Decreased infrastructure costs by $500K annually'
+                                'name': 'System Optimization',
+                                'description': 'Performance improvements',
+                                'quantifiable_outcomes': [
+                                    {
+                                        'metric': 'Response Time',
+                                        'description': 'Reduced p95 latency from 500ms to 300ms'
+                                    },
+                                    {
+                                        'metric': 'Cost Savings',
+                                        'description': 'Decreased infrastructure costs by $500K annually'
+                                    }
+                                ]
                             }
                         ]
                     }
@@ -313,27 +338,32 @@ class TestAchievementOptionalFields:
             output_path = os.path.join(tmpdir, 'achievements.md')
 
             data = {
-                'achievements': [
+                'categories': [
                     {
-                        'name': 'Complete Achievement',
-                        'description': 'Full test',
-                        'overview': {
-                            'summary': 'Comprehensive test',
-                            'scale': {'size': 'large'},
-                            'context': 'Test context'
-                        },
-                        'variations': [
+                        'name': 'Comprehensive',
+                        'achievements': [
                             {
-                                'emphasis': 'Test',
-                                'use_for': ['test'],
-                                'text': 'Test text',
-                                'highlights': ['highlight']
-                            }
-                        ],
-                        'quantifiable_outcomes': [
-                            {
-                                'metric': 'Test',
-                                'description': 'Test outcome'
+                                'name': 'Complete Achievement',
+                                'description': 'Full test',
+                                'overview': {
+                                    'summary': 'Comprehensive test',
+                                    'scale': {'size': 'large'},
+                                    'context': 'Test context'
+                                },
+                                'variations': [
+                                    {
+                                        'emphasis': 'Test',
+                                        'use_for': ['test'],
+                                        'text': 'Test text',
+                                        'highlights': ['highlight']
+                                    }
+                                ],
+                                'quantifiable_outcomes': [
+                                    {
+                                        'metric': 'Test',
+                                        'description': 'Test outcome'
+                                    }
+                                ]
                             }
                         ]
                     }
