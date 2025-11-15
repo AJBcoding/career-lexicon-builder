@@ -256,6 +256,14 @@ See [PHASES.md](PHASES.md) for the complete story of how this project evolved fr
 - **[docs/LOGGING.md](docs/LOGGING.md)** - Logging architecture
 - **[DOCKER_README.md](DOCKER_README.md)** - Docker containerization
 
+### Code Reviews (2025-11-15)
+- **[docs/reviews/REVIEW_INDEX.md](docs/reviews/REVIEW_INDEX.md)** - Review navigation guide
+- **[docs/reviews/architecture_review.md](docs/reviews/architecture_review.md)** - Architecture & design patterns (14 issues)
+- **[docs/reviews/security_audit_report.md](docs/reviews/security_audit_report.md)** - Security vulnerabilities (18 issues, 4 P0)
+- **[docs/reviews/audit_summary.md](docs/reviews/audit_summary.md)** - Quick security reference
+- **[docs/reviews/critical_issues_code_examples.md](docs/reviews/critical_issues_code_examples.md)** - Architecture fixes
+- **[docs/reviews/remediation_code_examples.md](docs/reviews/remediation_code_examples.md)** - Security fixes
+
 ### Design Documents
 - **[DesignDocuments/2025-10-31-llm-based-analysis-design.md](DesignDocuments/2025-10-31-llm-based-analysis-design.md)** - Lexicon generation design
 - **[DesignDocuments/2025-10-31-socratic-career-skills-system-design.md](DesignDocuments/2025-10-31-socratic-career-skills-system-design.md)** - Socratic skills design
