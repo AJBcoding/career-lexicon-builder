@@ -378,6 +378,121 @@ class TestAchievementOptionalFields:
                 assert 'Complete Achievement' in content
                 assert len(content) > 200  # Has substantial content
 
+    def test_achievement_usage_recommendations(self):
+        """Test achievement with usage recommendations (lines 357-383)."""
+        generator = HierarchicalMarkdownGenerator()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = os.path.join(tmpdir, 'achievements.md')
+
+            data = {
+                'categories': [
+                    {
+                        'name': 'Leadership',
+                        'achievements': [
+                            {
+                                'name': 'Team Leadership',
+                                'description': 'Led cross-functional team',
+                                'usage_recommendations': {
+                                    'resume': {
+                                        'bullet_style': 'Action-oriented',
+                                        'emphasis': 'Quantifiable results'
+                                    },
+                                    'cover_letter': {
+                                        'positioning': 'Opening paragraph',
+                                        'tone': 'Confident but humble'
+                                    },
+                                    'interview': {
+                                        'good_for': ['behavioral questions', 'leadership rounds'],
+                                        'star_format': {
+                                            'situation': 'Cross-functional project with tight deadline',
+                                            'task': 'Coordinate 3 teams',
+                                            'action': 'Implemented daily standups',
+                                            'result': 'Delivered 2 weeks early'
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+
+            result = generator.generate_achievements(data, output_path)
+
+            with open(output_path, 'r') as f:
+                content = f.read()
+                assert 'Usage Recommendations' in content
+                assert 'Resume' in content
+                assert 'Cover Letter' in content
+                assert 'Interview' in content
+                assert 'STAR Format' in content
+                assert 'Situation' in content
+
+    def test_achievement_related_achievements(self):
+        """Test achievement with related achievements (lines 386-389)."""
+        generator = HierarchicalMarkdownGenerator()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = os.path.join(tmpdir, 'achievements.md')
+
+            data = {
+                'categories': [
+                    {
+                        'name': 'Technical',
+                        'achievements': [
+                            {
+                                'name': 'System Migration',
+                                'description': 'Migrated legacy system',
+                                'related_achievements': [
+                                    'Database Optimization',
+                                    'API Redesign',
+                                    'Performance Tuning'
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+
+            result = generator.generate_achievements(data, output_path)
+
+            with open(output_path, 'r') as f:
+                content = f.read()
+                assert 'Related achievements' in content or 'related' in content.lower()
+                assert 'Database Optimization' in content
+                assert 'API Redesign' in content
+
+    def test_achievement_keywords(self):
+        """Test achievement with keywords (lines 392-395)."""
+        generator = HierarchicalMarkdownGenerator()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = os.path.join(tmpdir, 'achievements.md')
+
+            data = {
+                'categories': [
+                    {
+                        'name': 'Innovation',
+                        'achievements': [
+                            {
+                                'name': 'Product Innovation',
+                                'description': 'Launched new product feature',
+                                'keywords': ['innovation', 'product', 'launch', 'growth']
+                            }
+                        ]
+                    }
+                ]
+            }
+
+            result = generator.generate_achievements(data, output_path)
+
+            with open(output_path, 'r') as f:
+                content = f.read()
+                assert 'Keywords' in content
+                assert '`innovation`' in content
+                assert '`product`' in content
+
 
 class TestNarrativeOptionalFields:
     """Test narrative generation with optional fields."""
@@ -473,6 +588,86 @@ class TestNarrativeOptionalFields:
                 assert 'Examples' in content
                 assert 'Breakdown' in content
                 assert 'Optimized database queries' in content
+
+    def test_narrative_pattern_when_to_use(self):
+        """Test narrative pattern with when_to_use field (lines 507-509)."""
+        generator = HierarchicalMarkdownGenerator()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = os.path.join(tmpdir, 'narratives.md')
+
+            data = {
+                'closing_strategies': [
+                    {
+                        'strategy_name': 'Call to Action',
+                        'description': 'Strong closing that prompts response',
+                        'when_to_use': 'When you want to prompt immediate follow-up'
+                    }
+                ]
+            }
+
+            result = generator.generate_narratives(data, output_path)
+
+            with open(output_path, 'r') as f:
+                content = f.read()
+                # Strategy name is rendered in title, verify content instead
+                assert 'When to use' in content
+                assert 'immediate follow-up' in content
+                assert 'Strong closing' in content
+
+    def test_narrative_pattern_effectiveness(self):
+        """Test narrative pattern with effectiveness field (lines 512-514)."""
+        generator = HierarchicalMarkdownGenerator()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = os.path.join(tmpdir, 'narratives.md')
+
+            data = {
+                'cover_letter_architecture': [
+                    {
+                        'pattern_name': 'Problem-Solution Pattern',
+                        'description': 'Frame yourself as the solution',
+                        'effectiveness': 'Creates narrative where you are the answer to their needs'
+                    }
+                ]
+            }
+
+            result = generator.generate_narratives(data, output_path)
+
+            with open(output_path, 'r') as f:
+                content = f.read()
+                assert 'Problem-Solution Pattern' in content
+                assert 'Why it works' in content
+                assert 'answer to their needs' in content
+
+    def test_narrative_pattern_variations(self):
+        """Test narrative pattern with variations field (lines 517-522)."""
+        generator = HierarchicalMarkdownGenerator()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = os.path.join(tmpdir, 'narratives.md')
+
+            data = {
+                'evidence_presentation_patterns': [
+                    {
+                        'pattern_name': 'Storytelling Pattern',
+                        'description': 'Use narrative arc',
+                        'variations': [
+                            {'variant_name': 'Short Form', 'adjustment': 'Condense to 2-3 sentences'},
+                            {'variant_name': 'Extended Form', 'adjustment': 'Develop full paragraph'}
+                        ]
+                    }
+                ]
+            }
+
+            result = generator.generate_narratives(data, output_path)
+
+            with open(output_path, 'r') as f:
+                content = f.read()
+                assert 'Storytelling Pattern' in content
+                assert 'Variations' in content
+                assert 'Short Form' in content
+                assert 'Extended Form' in content
 
 
 # Language bank tests removed - complex data structure requires more investigation
