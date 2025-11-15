@@ -377,3 +377,102 @@ class TestAchievementOptionalFields:
                 content = f.read()
                 assert 'Complete Achievement' in content
                 assert len(content) > 200  # Has substantial content
+
+
+class TestNarrativeOptionalFields:
+    """Test narrative generation with optional fields."""
+
+    def test_narrative_pattern_with_structure(self):
+        """Test narrative pattern with structure field (lines 472-483)."""
+        generator = HierarchicalMarkdownGenerator()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = os.path.join(tmpdir, 'narratives.md')
+
+            data = {
+                'cover_letter_architecture': [
+                    {
+                        'pattern_name': 'Hook Pattern',
+                        'description': 'Start with compelling opening',
+                        'structure': [
+                            {'step': '1', 'element': 'Attention grabber'},
+                            {'step': '2', 'element': 'Value proposition'}
+                        ]
+                    }
+                ]
+            }
+
+            result = generator.generate_narratives(data, output_path)
+
+            with open(output_path, 'r') as f:
+                content = f.read()
+                assert 'Hook Pattern' in content
+                assert 'Structure' in content
+                assert 'Attention grabber' in content
+
+    def test_narrative_pattern_with_examples(self):
+        """Test narrative pattern with examples field (lines 488-493)."""
+        generator = HierarchicalMarkdownGenerator()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = os.path.join(tmpdir, 'narratives.md')
+
+            data = {
+                'evidence_presentation_patterns': [
+                    {
+                        'pattern_name': 'CAR Method',
+                        'description': 'Context-Action-Result pattern',
+                        'examples': [
+                            {'text': 'Faced with X challenge, I did Y, resulting in Z'},
+                            {'text': 'In the context of A, I implemented B'}
+                        ]
+                    }
+                ]
+            }
+
+            result = generator.generate_narratives(data, output_path)
+
+            with open(output_path, 'r') as f:
+                content = f.read()
+                assert 'CAR Method' in content
+                assert 'Examples' in content or 'examples' in content.lower()
+                assert 'Faced with X challenge' in content
+
+    def test_bullet_formula_with_examples(self):
+        """Test bullet formula with examples and breakdown (lines 552-562)."""
+        generator = HierarchicalMarkdownGenerator()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = os.path.join(tmpdir, 'narratives.md')
+
+            data = {
+                'resume_bullet_formulas': [
+                    {
+                        'formula_name': 'Action-Result Formula',
+                        'template': '[Action Verb] + [What] + [Result/Impact]',
+                        'examples': [
+                            {
+                                'text': 'Optimized database queries, reducing load time by 40%',
+                                'breakdown': {
+                                    'action': 'Optimized',
+                                    'what': 'database queries',
+                                    'result': 'reducing load time by 40%'
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+
+            result = generator.generate_narratives(data, output_path)
+
+            with open(output_path, 'r') as f:
+                content = f.read()
+                assert 'Action-Result Formula' in content
+                assert 'Template' in content
+                assert 'Examples' in content
+                assert 'Breakdown' in content
+                assert 'Optimized database queries' in content
+
+
+# Language bank tests removed - complex data structure requires more investigation
