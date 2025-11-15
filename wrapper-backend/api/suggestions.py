@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from services.suggestions_service import SuggestionsService
 from services.project_service import ProjectService
 from utils.auth import get_current_user
+from utils.security import validate_file_path
 from models.db_models import User
 from database import SessionLocal
 import logging
@@ -84,7 +85,13 @@ async def analyze_document(
 
     # Read document content
     applications_dir = Path(os.getenv("APPLICATIONS_DIR", "applications"))
-    file_path = applications_dir / project_id / filename
+    project_path = applications_dir / project_id
+
+    # Validate file path to prevent path traversal attacks
+    try:
+        file_path = validate_file_path(project_path, filename, allow_dirs=False)
+    except HTTPException:
+        raise HTTPException(status_code=403, detail="Access to this file is not allowed")
 
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="Document not found")

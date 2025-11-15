@@ -1,6 +1,9 @@
 from pathlib import Path
 import markdown2
 from typing import Optional
+from fastapi import HTTPException
+
+from wrapper_backend.utils.security import validate_file_path
 
 class PreviewService:
     def __init__(self, applications_dir: Path):
@@ -9,7 +12,12 @@ class PreviewService:
     def markdown_to_html(self, project_id: str, filename: str) -> Optional[str]:
         """Convert markdown file to HTML"""
         project_path = self.applications_dir / project_id
-        md_file = project_path / filename
+
+        # Validate file path to prevent path traversal attacks
+        try:
+            md_file = validate_file_path(project_path, filename, allow_dirs=False)
+        except HTTPException:
+            return None
 
         if not md_file.exists():
             return None
@@ -82,7 +90,12 @@ class PreviewService:
     def get_pdf_path(self, project_id: str, filename: str) -> Optional[Path]:
         """Get path to PDF file if it exists"""
         project_path = self.applications_dir / project_id
-        pdf_file = project_path / filename
+
+        # Validate file path to prevent path traversal attacks
+        try:
+            pdf_file = validate_file_path(project_path, filename, allow_dirs=False)
+        except HTTPException:
+            return None
 
         if pdf_file.exists() and pdf_file.suffix == '.pdf':
             return pdf_file

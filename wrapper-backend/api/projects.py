@@ -51,15 +51,33 @@ async def list_projects(
     return service.list_projects(owner_id=current_user.id)
 
 @router.post("/{project_id}/watch")
-async def start_watching_project(project_id: str):
+async def start_watching_project(
+    project_id: str,
+    current_user: User = Depends(get_current_user),
+    service: ProjectService = Depends(get_project_service)
+):
     """Start watching project directory for file changes"""
+    # Verify project ownership
+    project = service.get_project(project_id, owner_id=current_user.id)
+    if not project:
+        raise HTTPException(status_code=403, detail="Unauthorized")
+
     manager = get_project_watcher_manager()
     await manager.start_watching_project(project_id)
     return {"status": "watching", "project_id": project_id}
 
 @router.delete("/{project_id}/watch")
-async def stop_watching_project(project_id: str):
+async def stop_watching_project(
+    project_id: str,
+    current_user: User = Depends(get_current_user),
+    service: ProjectService = Depends(get_project_service)
+):
     """Stop watching project directory"""
+    # Verify project ownership
+    project = service.get_project(project_id, owner_id=current_user.id)
+    if not project:
+        raise HTTPException(status_code=403, detail="Unauthorized")
+
     manager = get_project_watcher_manager()
     manager.stop_watching_project(project_id)
     return {"status": "stopped", "project_id": project_id}
